@@ -8,9 +8,13 @@ acho que evitar fazer commit com pouca coisa é bom também, mas aí já vai de 
 
 ## Divisão das tarefas:
 Igor:
+
 Gustavo:
+
 Enzo:
+
 Toledo:
+
 
 # Trabalho 1
 **Universidade Federal de Juiz de Fora**
