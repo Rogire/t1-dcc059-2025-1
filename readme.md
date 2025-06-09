@@ -1,3 +1,17 @@
+## Essa parte é pra excluir antes de enviar o trabalho
+igor:
+gente tenta evitar de fazer muito commit direto na main pra não interferir no código dos outros
+e acabar bagunçando o git history, vamos tentar fazer nossos commits em branchs separadas e só depois subir
+o código já testado e funcionando na main que acho que vai ficar melhor
+
+acho que evitar fazer commit com pouca coisa é bom também, mas aí já vai de cada um
+
+## Divisão das tarefas:
+Igor:
+Gustavo:
+Enzo:
+Toledo:
+
 # Trabalho 1
 **Universidade Federal de Juiz de Fora**
 **Departamento de Ciência da Computação**
