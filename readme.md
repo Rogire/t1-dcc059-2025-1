@@ -6,6 +6,10 @@ o código já testado e funcionando na main que acho que vai ficar melhor
 
 acho que evitar fazer commit com pouca coisa é bom também, mas aí já vai de cada um
 
+links:
+https://csacademy.com/app/graph_editor/
+https://graphonline.top/pt/
+
 ## Divisão das tarefas:
 Igor:
 
