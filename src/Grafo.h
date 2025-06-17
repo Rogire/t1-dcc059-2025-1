@@ -8,12 +8,14 @@
 #include "No.h"
 #include <iostream>
 #include <vector>
-
-
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <algorithm>
 using namespace std;
 class Grafo {
 public:
-    Grafo();
+    Grafo(const string& nome_arquivo);
     ~Grafo();
 
     vector<char> fecho_transitivo_direto(int id_no); // a
@@ -28,6 +30,10 @@ public:
     vector<char> centro(); // h 3
     vector<char> periferia(); // h 4
     vector<char> vertices_de_articulacao(); // i
+    
+    //criado pelo grupo
+    int indice_no(char id);
+    void imprimir_grafo();
 
 
     int ordem;
