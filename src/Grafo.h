@@ -35,7 +35,6 @@ public:
     int indice_no(char id);
     void imprimir_grafo();
 
-
     int ordem;
     bool in_direcionado;
     bool in_ponderado_aresta;
