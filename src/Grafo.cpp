@@ -182,9 +182,67 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     return nullptr;
 }
 
-Grafo * Grafo::arvore_caminhamento_profundidade(char id_no) {
-    cout<<"Metodo nao implementado"<<endl;
-    return nullptr;
+//=========================================================================
+
+template <typename K, typename V > class par
+{
+    public:
+        par(K k, V v) : key(k), value(v){} 
+
+        K getKey() { return key; };
+        V getValue() { return value; };
+
+        void setKey(K k) { key = k;};
+        void setValue(V v) { value = v;};
+
+    private:
+        K key;
+        V value;
+};
+//=========================================================================
+Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
+{
+    std::vector< par<No*, bool> > JaPassou;
+    std::vector<par<No *, int>> OrdemVisitacao;
+
+    No *comeco;
+
+    for(No* no : this->lista_adj)
+    {
+        if(no->id == id_no)
+            comeco = no;
+
+        JaPassou.push_back(par(no, false));
+    }
+
+    for (auto &par : JaPassou)
+    {
+        if(!par.getValue())
+            par.setValue(true);
+
+        PROF(par.getKey(), JaPassou);
+    }
+        return nullptr;
+};
+
+void PROF(No* NoAt, std::vector<par<No*,bool>> JaP)
+{
+    JaP[NoAt->id].setValue(true);
+    
+    for (int i{0}; i < static_cast<int>(NoAt->arestas.size()); i++)
+    {
+        auto prox = NoAt->arestas[i]->id_no_alvo;
+
+        for (auto& par : JaP)
+        {
+            if(par.getKey()->id == prox)
+            {
+                if(!par.getValue())
+                    PROF(par.getKey(),JaP);
+                break;
+            }
+        }
+    }
 }
 
 int Grafo::raio() {
