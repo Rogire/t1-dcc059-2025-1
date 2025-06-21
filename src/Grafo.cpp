@@ -259,7 +259,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     char idNoIn = comeco->getKey()->id;
     std::string strIn = std::string(1, idNoIn) + " " + std::string(1, idInic);
 
-    if(comeco->getKey()->arestas.empty())
+    if(!comeco->getKey()->arestas.empty())
         listaArestas.push_back(strIn);
 
     PROF(comeco->getKey(), &Hash, &listaArestas);
@@ -270,11 +270,11 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 //TODO: ACHO QUE TÁ PRONTO, FALTA TESTAR
 void PROF(No* NoAt, HASH<No*,bool>* hash_nodes, std::vector<std::string>* listaAdjRet)
 {
-    bool add = true;
+    
     for (Aresta *at : NoAt->arestas)
     {
         par<No *, bool> *ParAt = hash_nodes->get(at->id_no_alvo);
-
+        bool add{};
         //Adiciona as arestas lista no formato que elas vão ser escritas no grafo "x y"
         //A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
         //repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se 
@@ -283,6 +283,7 @@ void PROF(No* NoAt, HASH<No*,bool>* hash_nodes, std::vector<std::string>* listaA
         std::string strAtual = NoAt->id + " " + ParAt->getKey()->id;
         for(std::string str : *listaAdjRet)   
         {
+            add = true;
             if(str == strAtual)
             {
                 add = false;
