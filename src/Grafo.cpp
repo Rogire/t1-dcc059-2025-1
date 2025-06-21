@@ -182,12 +182,13 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     return nullptr;
 }
 
-//=========================================================================
+//=====================classes auxiliares================================
 
 template <typename K, typename V > class par
 {
     public:
         par(K k, V v) : key(k), value(v){} 
+        par(){}
 
         K getKey() { return key; };
         V getValue() { return value; };
@@ -199,48 +200,111 @@ template <typename K, typename V > class par
         K key;
         V value;
 };
+
+template <typename K, typename V> class HASH
+{
+    public:
+        HASH(std::vector<K>& lista_adj)
+        {
+            int maior = lista_adj.at(0)->id;
+
+            for (auto No : lista_adj)
+                if (No->id > maior)
+                    maior = No->id;
+
+            this->tam = maior + 1;
+
+            this->Hash = new par<K, V> *[this->tam];
+
+            for (int i = 0; i < this->tam; i++)
+                this->Hash[i] = nullptr;
+
+            for (auto node : lista_adj)
+                this->Hash[node->id] = new par<K,V>(node,false);
+        };
+
+        ~HASH()
+        {
+            for(int i{0}; i < tam; i++)
+                delete this->Hash[i];
+
+            delete[] this->Hash;
+        }
+
+        par<K,V>* get(int id)
+        {
+            if (id >=0 && id<tam)
+                return this->Hash[id];
+
+            return nullptr;
+        }
+
+    private:
+        par<K,V> **Hash;
+        int tam{};
+};
 //=========================================================================
+
+
+//TODO: FALTA USAR O listaArestas PRA ESCREVER O ARQUIVO DO GRAFO
 Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 {
-    std::vector< par<No*, bool> > JaPassou;
-    std::vector<par<No *, int>> OrdemVisitacao;
+    HASH<No*,bool> Hash = HASH<No*,bool>(this->lista_adj);
+    std::vector<std::string> listaArestas;
 
-    No *comeco;
+    auto *comeco = Hash.get(id_no);
+    comeco->setValue(true);
 
-    for(No* no : this->lista_adj)
-    {
-        if(no->id == id_no)
-            comeco = no;
+    char idInic = comeco->getKey()->arestas[0]->id_no_alvo;
+    char idNoIn = comeco->getKey()->id;
+    std::string strIn = std::string(1, idNoIn) + " " + std::string(1, idInic);
 
-        JaPassou.push_back(par(no, false));
-    }
+    if(comeco->getKey()->arestas.empty())
+        listaArestas.push_back(strIn);
 
-    for (auto &par : JaPassou)
-    {
-        if(!par.getValue())
-            par.setValue(true);
+    PROF(comeco->getKey(), &Hash, &listaArestas);
 
-        PROF(par.getKey(), JaPassou);
-    }
-        return nullptr;
+    return nullptr;
 };
 
-void PROF(No* NoAt, std::vector<par<No*,bool>> JaP)
+//TODO: ACHO QUE TÁ PRONTO, FALTA TESTAR
+void PROF(No* NoAt, HASH<No*,bool>* hash_nodes, std::vector<std::string>* listaAdjRet)
 {
-    JaP[NoAt->id].setValue(true);
-    
-    for (int i{0}; i < static_cast<int>(NoAt->arestas.size()); i++)
+    bool add = true;
+    for (Aresta *at : NoAt->arestas)
     {
-        auto prox = NoAt->arestas[i]->id_no_alvo;
+        par<No *, bool> *ParAt = hash_nodes->get(at->id_no_alvo);
 
-        for (auto& par : JaP)
+        //Adiciona as arestas lista no formato que elas vão ser escritas no grafo "x y"
+        //A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
+        //repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se 
+        //o inverso da aresta atual já está lista, se não está, adiciona
+
+        std::string strAtual = NoAt->id + " " + ParAt->getKey()->id;
+        for(std::string str : *listaAdjRet)   
         {
-            if(par.getKey()->id == prox)
+            if(str == strAtual)
             {
-                if(!par.getValue())
-                    PROF(par.getKey(),JaP);
+                add = false;
                 break;
             }
+                
+            if(str.size()==3 && strAtual.size() == 3)
+                if(strAtual[0]==str[2] && strAtual[2] == str[0])
+                {
+                    add = false;
+                    break;
+                }
+        }
+        if(add)
+            listaAdjRet->push_back(strAtual);
+
+        // se não passou pelo vertice atual
+        if (!ParAt->getValue())
+        {
+            ParAt->setValue(true);
+            // PROF(vertice Atual, Hash)
+            PROF(ParAt->getKey(), hash_nodes, listaAdjRet);
         }
     }
 }
