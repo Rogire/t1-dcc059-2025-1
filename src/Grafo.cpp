@@ -277,47 +277,8 @@ template <typename K, typename V> class HASH
 // A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
 // repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se
 // o inverso da aresta atual já está lista, se não está, adiciona
-void PROF(No *NoAt, HASH<No *, bool>*hash_nodes, std::vector<std::string> *listaAdjRet)
-{
-    for (Aresta *at : NoAt->arestas)
-    {   
-        par<No*, bool> *ParAt = hash_nodes->get(at->id_no_alvo);
-        bool add{};
-        std::string strAtual = std::string(1, NoAt->id) + " " + std::string(1, ParAt->getKey()->id);
 
-        for (std::string str : *listaAdjRet)
-        {
-            add = true;
-
-            if (str == strAtual)
-            {
-                add = false;
-                break;
-            }
-
-            // evita duplicatas (a b, e b a)
-            if (str.size() == 3 && strAtual.size() == 3)
-                if (strAtual[0] == str[2] && strAtual[2] == str[0])
-                {
-                    add = false;
-                    break;
-                }
-        }
-        if (add)
-            listaAdjRet->push_back(strAtual);  
-        
-            
-        // se não passou pelo vertice atual
-        if (!ParAt->getValue())
-        {
-            ParAt->setValue(true);
-            // PROF(vertice Atual, Hash, lista Strings)
-            PROF(ParAt->getKey(), hash_nodes, listaAdjRet);
-        }
-    }
-}
-
-void PROF_teste(No *NoAt, HASH<No *, bool> *hash_nodes, std::vector<par<std::string,int>> *listaAdjRet)
+void PROF(No *NoAt, HASH<No *, bool> *hash_nodes, std::vector<par<std::string,int>> *listaAdjRet)
 {
     for (Aresta *at : NoAt->arestas)
     {
@@ -351,7 +312,7 @@ void PROF_teste(No *NoAt, HASH<No *, bool> *hash_nodes, std::vector<par<std::str
         {
             ParAt->setValue(true);
             // PROF(vertice Atual, Hash, lista Strings)
-            PROF_teste(ParAt->getKey(), hash_nodes, listaAdjRet);
+            PROF(ParAt->getKey(), hash_nodes, listaAdjRet);
         }
     }
 }
@@ -363,7 +324,6 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     HASH<No*,bool> Hash = HASH<No*,bool>(this->lista_adj);
     Hash.InitHash(this->lista_adj, false);
 
-    // std::vector<std::string> listaArestas;
     std::vector<par<std::string,int>> listaArestas;
 
     auto *comeco = Hash.get(id_no);
@@ -375,17 +335,45 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
         char idNoIn = comeco->getKey()->id;
 
         std::string strIn = std::string(1, idNoIn) + " " + std::string(1, idInic);
-        
+
         listaArestas.push_back(par(strIn,comeco->getKey()->arestas[0]->peso));
     }
 
-    PROF_teste(comeco->getKey(), &Hash, &listaArestas);
+    PROF(comeco->getKey(), &Hash, &listaArestas);
 
     std::cout << "VETOR FINAL: \n";
         for (auto s : listaArestas)
             std::cout << s.getKey() << " "<< s.getValue() << " \n";
 
+    std::ofstream temp("CaminhamentoProfundidade.txt");
+
+    if (!temp.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
         return nullptr;
+    }
+
+    temp << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
+    temp << ordem << std::endl;
+
+    for(No* node : this->lista_adj)
+        temp << node->id << "\n";
+    
+    if(this->in_ponderado_aresta)
+        for(auto t : listaArestas)
+            temp << t.getKey() << " " <<t.getValue() << "\n";
+    else
+        for (auto t : listaArestas)
+            temp << t.getKey() << "\n";
+
+    temp.close();
+
+    Grafo* ret = new Grafo("CaminhamentoProfundidade.txt");
+
+    //considerando que o exercício foi feito pensando para rodar em ambientes UNIX
+    system("rm CaminhamentoProfundidade.txt");
+    
+    return ret;
 };
 
 
