@@ -333,6 +333,9 @@ void Grafo::montar_Grafo_por_arquivo(const string &nome_arquivo)
 
     // Imprime o grafo após a leitura
     imprimir_grafo();
+
+    this->Hash_n = new HASH<No *, bool>(this->lista_adj);
+    this->Hash_n->InitHash(this->lista_adj, false);
 }
 
 vector<char> Grafo::fecho_transitivo_direto(char id_no) {
@@ -366,11 +369,11 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
 }
 
 //=====================classes auxiliares================================
-
+/*
 template <typename K, typename V > class par
 {
     public:
-        par(K k, V v) : key(k), value(v){} 
+        par(K k, V v) : key(k), value(v){}
         par(){}
 
         K getKey() { return key; };
@@ -453,19 +456,19 @@ template <typename K, typename V> class HASH
         par<K,V> **Hash;
         int tam{};
 };
+*/
+
 //=========================================================================
-// TODO: ACHO QUE TÁ PRONTO, FALTA TESTAR
 
 // Adiciona as arestas lista no formato que elas vão ser escritas no grafo "x y"
 // A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
 // repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se
 // o inverso da aresta atual já está lista, se não está, adiciona
-
-void PROF(No *NoAt, HASH<No *, bool> *hash_nodes, std::vector<par<std::string,int>> *listaAdjRet)
+void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
 {
     for (Aresta *at : NoAt->arestas)
     {
-        par<No *, bool> *ParAt = hash_nodes->get(at->id_no_alvo);
+        par<No *, bool> *ParAt = this->Hash_n->get(at->id_no_alvo);
         bool add{};
         std::string strAtual = std::string(1, NoAt->id) + " " + std::string(1, ParAt->getKey()->id);
 
@@ -495,21 +498,16 @@ void PROF(No *NoAt, HASH<No *, bool> *hash_nodes, std::vector<par<std::string,in
         {
             ParAt->setValue(true);
             // PROF(vertice Atual, Hash, lista Strings)
-            PROF(ParAt->getKey(), hash_nodes, listaAdjRet);
+            PROF(ParAt->getKey(), listaAdjRet);
         }
     }
 }
 
-//TODO: FALTA USAR O listaArestas PRA ESCREVER O ARQUIVO DO GRAFO
-
 Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 {   
-    HASH<No*,bool> Hash = HASH<No*,bool>(this->lista_adj);
-    Hash.InitHash(this->lista_adj, false);
-
     std::vector<par<std::string,int>> listaArestas;
 
-    auto *comeco = Hash.get(id_no);
+    auto *comeco = this->Hash_n->get(id_no);
     comeco->setValue(true);
 
     if (!comeco->getKey()->arestas.empty())
@@ -522,7 +520,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
         listaArestas.push_back(par(strIn,comeco->getKey()->arestas[0]->peso));
     }
 
-    PROF(comeco->getKey(), &Hash, &listaArestas);
+    PROF(comeco->getKey(), &listaArestas);
 
     std::cout << "VETOR FINAL: \n";
         for (auto s : listaArestas)
@@ -556,7 +554,6 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 
     // considerando que o exercício foi feito pensando para rodar em ambientes UNIX
     system("rm CaminhamentoProfundidade.txt");
-
     return ret;
 };
 

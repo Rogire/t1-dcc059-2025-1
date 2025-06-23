@@ -16,6 +16,10 @@
 #include <list>
 #include <utility>
 #include <limits.h>
+
+#include "Hash.h"
+#include "par.h"
+
 using namespace std;
 
 class Grafo
@@ -42,6 +46,9 @@ public:
     int indice_no(char id);
     void imprimir_grafo();
     void calula_excentricidade();
+
+    HASH<No*, bool>* Hash_n;
+    void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
 
     int ordem;
     bool in_direcionado;
