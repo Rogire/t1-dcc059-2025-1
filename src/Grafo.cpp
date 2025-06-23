@@ -206,6 +206,12 @@ template <typename K, typename V> class HASH
     public:
         HASH(std::vector<K>& lista_adj)
         {
+            if (lista_adj.empty())
+            {
+                std::cerr << "Erro: lista_adj está vazia!" << std::endl;
+                return;
+            }
+
             int maior = lista_adj.at(0)->id;
 
             for (auto No : lista_adj)
@@ -218,10 +224,31 @@ template <typename K, typename V> class HASH
 
             for (int i = 0; i < this->tam; i++)
                 this->Hash[i] = nullptr;
+        };
+
+        void InitHash(std::vector<K> &lista_adj, V valInicial)
+        {
+            for (auto node : lista_adj)
+            {
+                if (node->id >= 0 && node->id < this->tam)
+                {
+                    if (this->Hash[node->id] != nullptr)
+                        delete this->Hash[node->id];
+
+                    this->Hash[node->id] = new par<K, V>(node, valInicial);
+                }
+            }
+        }
+
+        void printHash(std::vector<K> &lista_adj)
+        {
+            std::cout <<" HASH MONTADA: \n";
 
             for (auto node : lista_adj)
-                this->Hash[node->id] = new par<K,V>(node,false);
-        };
+            {
+                std::cout << this->Hash[node->id]->getKey()->id << " \n";
+            }
+        }
 
         ~HASH()
         {
@@ -244,71 +271,123 @@ template <typename K, typename V> class HASH
         int tam{};
 };
 //=========================================================================
+// TODO: ACHO QUE TÁ PRONTO, FALTA TESTAR
 
-
-//TODO: FALTA USAR O listaArestas PRA ESCREVER O ARQUIVO DO GRAFO
-Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
+// Adiciona as arestas lista no formato que elas vão ser escritas no grafo "x y"
+// A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
+// repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se
+// o inverso da aresta atual já está lista, se não está, adiciona
+void PROF(No *NoAt, HASH<No *, bool>*hash_nodes, std::vector<std::string> *listaAdjRet)
 {
-    HASH<No*,bool> Hash = HASH<No*,bool>(this->lista_adj);
-    std::vector<std::string> listaArestas;
-
-    auto *comeco = Hash.get(id_no);
-    comeco->setValue(true);
-
-    char idInic = comeco->getKey()->arestas[0]->id_no_alvo;
-    char idNoIn = comeco->getKey()->id;
-    std::string strIn = std::string(1, idNoIn) + " " + std::string(1, idInic);
-
-    if(!comeco->getKey()->arestas.empty())
-        listaArestas.push_back(strIn);
-
-    PROF(comeco->getKey(), &Hash, &listaArestas);
-
-    return nullptr;
-};
-
-//TODO: ACHO QUE TÁ PRONTO, FALTA TESTAR
-void PROF(No* NoAt, HASH<No*,bool>* hash_nodes, std::vector<std::string>* listaAdjRet)
-{
-    
     for (Aresta *at : NoAt->arestas)
-    {
-        par<No *, bool> *ParAt = hash_nodes->get(at->id_no_alvo);
+    {   
+        par<No*, bool> *ParAt = hash_nodes->get(at->id_no_alvo);
         bool add{};
-        //Adiciona as arestas lista no formato que elas vão ser escritas no grafo "x y"
-        //A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
-        //repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se 
-        //o inverso da aresta atual já está lista, se não está, adiciona
+        std::string strAtual = std::string(1, NoAt->id) + " " + std::string(1, ParAt->getKey()->id);
 
-        std::string strAtual = NoAt->id + " " + ParAt->getKey()->id;
-        for(std::string str : *listaAdjRet)   
+        for (std::string str : *listaAdjRet)
         {
             add = true;
-            if(str == strAtual)
+
+            if (str == strAtual)
             {
                 add = false;
                 break;
             }
-                
-            if(str.size()==3 && strAtual.size() == 3)
-                if(strAtual[0]==str[2] && strAtual[2] == str[0])
+
+            // evita duplicatas (a b, e b a)
+            if (str.size() == 3 && strAtual.size() == 3)
+                if (strAtual[0] == str[2] && strAtual[2] == str[0])
                 {
                     add = false;
                     break;
                 }
         }
-        if(add)
-            listaAdjRet->push_back(strAtual);
-
+        if (add)
+            listaAdjRet->push_back(strAtual);  
+        
+            
         // se não passou pelo vertice atual
         if (!ParAt->getValue())
         {
             ParAt->setValue(true);
-            // PROF(vertice Atual, Hash)
+            // PROF(vertice Atual, Hash, lista Strings)
             PROF(ParAt->getKey(), hash_nodes, listaAdjRet);
         }
     }
 }
+
+void PROF_teste(No *NoAt, HASH<No *, bool> *hash_nodes, std::vector<par<std::string,int>> *listaAdjRet)
+{
+    for (Aresta *at : NoAt->arestas)
+    {
+        par<No *, bool> *ParAt = hash_nodes->get(at->id_no_alvo);
+        bool add{};
+        std::string strAtual = std::string(1, NoAt->id) + " " + std::string(1, ParAt->getKey()->id);
+
+        for (par<std::string,int> p : *listaAdjRet)
+        {
+            add = true;
+
+            if (p.getKey() == strAtual)
+            {
+                add = false;
+                break;
+            }
+
+            // evita duplicatas (a b, e b a)
+            if (p.getKey().size() == 3 && strAtual.size() == 3)
+                if (strAtual[0] == p.getKey()[2] && strAtual[2] == p.getKey()[0])
+                {
+                    add = false;
+                    break;
+                }
+        }
+        if (add)
+            listaAdjRet->push_back(par(strAtual,at->peso));
+        
+        // se não passou pelo vertice atual
+        if (!ParAt->getValue())
+        {
+            ParAt->setValue(true);
+            // PROF(vertice Atual, Hash, lista Strings)
+            PROF_teste(ParAt->getKey(), hash_nodes, listaAdjRet);
+        }
+    }
+}
+
+//TODO: FALTA USAR O listaArestas PRA ESCREVER O ARQUIVO DO GRAFO
+
+Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
+{   
+    HASH<No*,bool> Hash = HASH<No*,bool>(this->lista_adj);
+    Hash.InitHash(this->lista_adj, false);
+
+    // std::vector<std::string> listaArestas;
+    std::vector<par<std::string,int>> listaArestas;
+
+    auto *comeco = Hash.get(id_no);
+    comeco->setValue(true);
+
+    if (!comeco->getKey()->arestas.empty())
+    {
+        char idInic = comeco->getKey()->arestas[0]->id_no_alvo;
+        char idNoIn = comeco->getKey()->id;
+
+        std::string strIn = std::string(1, idNoIn) + " " + std::string(1, idInic);
+        
+        listaArestas.push_back(par(strIn,comeco->getKey()->arestas[0]->peso));
+    }
+
+    PROF_teste(comeco->getKey(), &Hash, &listaArestas);
+
+    std::cout << "VETOR FINAL: \n";
+        for (auto s : listaArestas)
+            std::cout << s.getKey() << " "<< s.getValue() << " \n";
+
+        return nullptr;
+};
+
 
 int Grafo::raio() {
     cout<<"Metodo nao implementado"<<endl;
