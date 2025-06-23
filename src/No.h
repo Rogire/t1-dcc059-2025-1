@@ -14,6 +14,7 @@ public:
 
     char id;
     int peso;
+    bool marca; // usada pra indicar que o no ja foi analisado
     vector<Aresta*> arestas;
 };
 
