@@ -11,13 +11,13 @@ https://csacademy.com/app/graph_editor/
 https://graphonline.top/pt/
 
 ## Divisão das tarefas:
-Igor:
+Igor: g e h
 
-Gustavo:
+Gustavo: b e c
 
-Enzo:
+Enzo: a e f
 
-Toledo:
+Toledo: d e e
 
 
 # Trabalho 1
