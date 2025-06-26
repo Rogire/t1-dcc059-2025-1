@@ -179,9 +179,6 @@ void Grafo::montar_Grafo_por_arquivo(const string &nome_arquivo)
 
     // Imprime o grafo após a leitura
     imprimir_grafo();
-
-    this->Hash_n = new HASH<No *, bool>(this->lista_adj);
-    this->Hash_n->InitHash(this->lista_adj, false);
 }
 
 vector<char> Grafo::fecho_transitivo_direto(char id_no) {
@@ -260,36 +257,35 @@ void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
         else
         {
             for (par<std::string, int> p : *listaAdjRet)
+             {
+                 add = true;
+
+                 if (p.getKey() == strAtual)
+                 {
+                     add = false;
+                     break;
+                 }
+             }
+ 
+            if (!ParAt->getValue())
             {
-                add = true;
-                
-                if (p.getKey() == strAtual)
-                {
-                    add = false;
-                    break;
-                }
-            }
+                PROF(ParAt->getKey(), listaAdjRet);
+                ParAt->setValue(true);
+
 
                 if(add)
                     listaAdjRet->push_back(par(strAtual, at->peso));
-
-                if (!ParAt->getValue())
-                {
-                    ParAt->setValue(true);
-                    // PROF(vertice Atual, Hash, lista Strings)
-                    PROF(ParAt->getKey(), listaAdjRet);
-                }
-            
-
-        }
-            
+            }
+    }            
     }
 }
 
-
 Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
-{   
-    std::vector<par<std::string,int>> listaArestas;
+{
+    this->Hash_n = new HASH<No *, bool>(this->lista_adj);
+    this->Hash_n->InitHash(this->lista_adj,false);
+
+    std::vector<par<std::string, int>> listaArestas;
 
     auto *comeco = this->Hash_n->get(id_no);
     comeco->setValue(true);
@@ -303,12 +299,12 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 
         listaArestas.push_back(par(strIn,comeco->getKey()->arestas[0]->peso));
     }
-
+    
     PROF(comeco->getKey(), &listaArestas);
 
     std::cout << "VETOR FINAL: \n";
-        for (auto s : listaArestas)
-            std::cout << s.getKey() << " "<< s.getValue() << " \n";
+    for (auto s : listaArestas)
+        std::cout << s.getKey() << " " << s.getValue() << " \n";
 
     std::ofstream temp("CaminhamentoProfundidade.txt");
 
@@ -326,7 +322,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
         temp << node->id;
 
         if(node->peso != 0)
-            temp <<" "<<node->id;
+            temp <<" "<<node->peso;
         
         temp << "\n";
     }
@@ -344,10 +340,9 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     ret->montar_Grafo_por_arquivo("CaminhamentoProfundidade.txt");
 
     // considerando que o exercício foi feito pensando para rodar em ambientes UNIX
-    //system("rm CaminhamentoProfundidade.txt");
+    system("rm CaminhamentoProfundidade.txt");
     return ret;
 };
-
 
 int Grafo::raio() {
     cout<<"Metodo nao implementado"<<endl;
