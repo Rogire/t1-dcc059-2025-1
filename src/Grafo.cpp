@@ -341,6 +341,8 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 
     // considerando que o exercício foi feito pensando para rodar em ambientes UNIX
     system("rm CaminhamentoProfundidade.txt");
+
+    this->Hash_n->~HASH();
     return ret;
 };
 
