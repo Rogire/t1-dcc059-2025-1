@@ -226,36 +226,66 @@ void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
         bool add{};
         std::string strAtual = std::string(1, NoAt->id) + " " + std::string(1, ParAt->getKey()->id);
 
-        for (par<std::string,int> p : *listaAdjRet)
+        if(this->in_direcionado == 0)
         {
-            add = true;
-
-            if (p.getKey() == strAtual)
+            for (par<std::string,int> p : *listaAdjRet)
             {
-                add = false;
-                break;
-            }
+                add = true;
 
-            // evita duplicatas (a b, e b a)
-            if (p.getKey().size() == 3 && strAtual.size() == 3)
-                if (strAtual[0] == p.getKey()[2] && strAtual[2] == p.getKey()[0])
+                if (p.getKey() == strAtual)
                 {
                     add = false;
                     break;
                 }
+
+                // evita duplicatas (a b, e b a)
+                if (p.getKey().size() == 3 && strAtual.size() == 3)
+                    if (strAtual[0] == p.getKey()[2] && strAtual[2] == p.getKey()[0])
+                    {
+                        add = false;
+                        break;
+                    }
+            }
+            if (add)
+                listaAdjRet->push_back(par(strAtual,at->peso));
+            
+            // se não passou pelo vertice atual
+            if(!ParAt->getValue())
+            {
+                ParAt->setValue(true);
+                // PROF(vertice Atual, Hash, lista Strings)
+                PROF(ParAt->getKey(), listaAdjRet);
+            }
         }
-        if (add)
-            listaAdjRet->push_back(par(strAtual,at->peso));
-        
-        // se não passou pelo vertice atual
-        if (!ParAt->getValue())
+        else
         {
-            ParAt->setValue(true);
-            // PROF(vertice Atual, Hash, lista Strings)
-            PROF(ParAt->getKey(), listaAdjRet);
+            for (par<std::string, int> p : *listaAdjRet)
+            {
+                add = true;
+                
+                if (p.getKey() == strAtual)
+                {
+                    add = false;
+                    break;
+                }
+            }
+
+                if(add)
+                    listaAdjRet->push_back(par(strAtual, at->peso));
+
+                if (!ParAt->getValue())
+                {
+                    ParAt->setValue(true);
+                    // PROF(vertice Atual, Hash, lista Strings)
+                    PROF(ParAt->getKey(), listaAdjRet);
+                }
+            
+
         }
+            
     }
 }
+
 
 Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 {   
@@ -292,8 +322,15 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     temp << ordem << std::endl;
 
     for(No* node : this->lista_adj)
-        temp << node->id << "\n";
-    
+    {
+        temp << node->id;
+
+        if(node->peso != 0)
+            temp <<" "<<node->id;
+        
+        temp << "\n";
+    }
+
     if(this->in_ponderado_aresta)
         for(auto t : listaArestas)
             temp << t.getKey() << " " <<t.getValue() << "\n";
@@ -307,7 +344,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     ret->montar_Grafo_por_arquivo("CaminhamentoProfundidade.txt");
 
     // considerando que o exercício foi feito pensando para rodar em ambientes UNIX
-    system("rm CaminhamentoProfundidade.txt");
+    //system("rm CaminhamentoProfundidade.txt");
     return ret;
 };
 
@@ -328,11 +365,6 @@ vector<char> Grafo::centro() {
 }
 
 vector<char> Grafo::periferia() {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
-}
-
-vector<char> Grafo::vertices_de_articulacao() {
     cout<<"Metodo nao implementado"<<endl;
     return {};
 }

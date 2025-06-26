@@ -39,7 +39,6 @@ public:
     int diametro();                                                 // h 2
     vector<char> centro();                                          // h 3
     vector<char> periferia();                                       // h 4
-    vector<char> vertices_de_articulacao();                         // i
 
     // criado pelo grupo
     void montar_Grafo_por_arquivo(const string &nome_arquivo);
