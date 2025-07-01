@@ -306,37 +306,8 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     for (auto s : listaArestas)
         std::cout << s.getKey() << " " << s.getValue() << " \n";
 
-    std::ofstream temp("CaminhamentoProfundidade.txt");
-
-    if (!temp.is_open())
-    {
-        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
-        return nullptr;
-    }
-
-    temp << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
-    temp << ordem << std::endl;
-
-    for(No* node : this->lista_adj)
-    {
-        temp << node->id;
-
-        if(node->peso != 0)
-            temp <<" "<<node->peso;
-        
-        temp << "\n";
-    }
-
-    if(this->in_ponderado_aresta)
-        for(auto t : listaArestas)
-            temp << t.getKey() << " " <<t.getValue() << "\n";
-    else
-        for (auto t : listaArestas)
-            temp << t.getKey() << "\n";
-
-    temp.close();
-
-    Grafo* ret = new Grafo();
+    std::ofstream arq = this->grafoParaArquivo(listaArestas, "CaminhamentoProfundidade.txt");
+    Grafo *ret = new Grafo();
     ret->montar_Grafo_por_arquivo("CaminhamentoProfundidade.txt");
 
     // considerando que o exercício foi feito pensando para rodar em ambientes UNIX
@@ -345,6 +316,43 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     this->Hash_n->~HASH();
     return ret;
 };
+
+std::ofstream Grafo::grafoParaArquivo(std::vector<par<std::string, int>>& listaArestas, std::string nomeArq)
+{
+    std::ofstream temp(nomeArq);
+
+    if (!temp.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return std::ofstream();
+    }
+
+    //cabeçalho do txt
+    temp << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
+    temp << ordem << std::endl;
+
+    for (No *node : this->lista_adj)
+    {
+        temp << node->id;
+
+        if (node->peso != 0)
+            temp << " " << node->peso;
+
+        temp << "\n";
+    }
+
+    // arestas do vértice
+    if (this->in_ponderado_aresta)
+        for (auto t : listaArestas)
+            temp << t.getKey() << " " << t.getValue() << "\n";
+    else
+        for (auto t : listaArestas)
+            temp << t.getKey() << "\n";
+
+    temp.close();
+
+    return temp;
+}
 
 int Grafo::raio() {
     cout<<"Metodo nao implementado"<<endl;
