@@ -46,6 +46,8 @@ public:
                 this->Hash[node->id] = new par<K, V>(node, valInicial);
             }
         }
+
+        std::cout << "Rodou inic hash\n";
     }
 
     void printHash(std::vector<K> &lista_adj)
