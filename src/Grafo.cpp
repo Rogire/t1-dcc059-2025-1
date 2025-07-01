@@ -217,9 +217,17 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
 // o inverso da aresta atual já está lista, se não está, adiciona
 void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
 {
+    std::cout << "Rodou inicio PROF\n";
+
     for (Aresta *at : NoAt->arestas)
     {
         par<No *, bool> *ParAt = this->Hash_n->get(at->id_no_alvo);
+        if (!ParAt)
+        {
+            std::cerr << "Erro: nó alvo " << at->id_no_alvo << " não encontrado na hash!" << std::endl;
+            continue;
+        }
+
         bool add{};
         std::string strAtual = std::string(1, NoAt->id) + " " + std::string(1, ParAt->getKey()->id);
 
@@ -250,7 +258,7 @@ void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
             if(!ParAt->getValue())
             {
                 ParAt->setValue(true);
-                // PROF(vertice Atual, Hash, lista Strings)
+                // PROF(vertice Atual, lista Strings)
                 PROF(ParAt->getKey(), listaAdjRet);
             }
         }
@@ -269,25 +277,32 @@ void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
  
             if (!ParAt->getValue())
             {
-                PROF(ParAt->getKey(), listaAdjRet);
                 ParAt->setValue(true);
-
+                PROF(ParAt->getKey(), listaAdjRet);
 
                 if(add)
                     listaAdjRet->push_back(par(strAtual, at->peso));
             }
-    }            
+        }            
     }
 }
 
 Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 {
+    std::cout << "Rodou inicio func\n";
+
     this->Hash_n = new HASH<No *, bool>(this->lista_adj);
     this->Hash_n->InitHash(this->lista_adj,false);
 
     std::vector<par<std::string, int>> listaArestas;
 
     auto *comeco = this->Hash_n->get(id_no);
+    if (!comeco)
+    {
+        std::cerr << "Erro: nó inicial "<< id_no <<" não encontrado na hash!" << std::endl;
+        return nullptr;
+    }
+
     comeco->setValue(true);
 
     if (!comeco->getKey()->arestas.empty())
@@ -296,11 +311,9 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
         char idNoIn = comeco->getKey()->id;
 
         std::string strIn = std::string(1, idNoIn) + " " + std::string(1, idInic);
-
         listaArestas.push_back(par(strIn,comeco->getKey()->arestas[0]->peso));
+        PROF(comeco->getKey(), &listaArestas);
     }
-    
-    PROF(comeco->getKey(), &listaArestas);
 
     std::cout << "VETOR FINAL: \n";
     for (auto s : listaArestas)
