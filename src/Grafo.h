@@ -44,6 +44,7 @@ public:
     void montar_Grafo_por_arquivo(const string &nome_arquivo);
     int indice_no(char id);
     void imprimir_grafo();
+    std::ofstream grafoParaArquivo(std::vector<par<std::string, int>>& listaArestas, std::string nomeArq);
     void calula_excentricidade();
 
     HASH<No*, bool>* Hash_n;
