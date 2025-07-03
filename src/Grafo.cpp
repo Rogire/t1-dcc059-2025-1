@@ -153,7 +153,21 @@ Grafo::~Grafo() {
 }
 
 vector<char> Grafo::fecho_transitivo_direto(char id_no) {
-    cout<<"Metodo nao implementado"<<endl;
+   if(!in_direcionado)
+   {
+    cout<<"O grafo não é direcionado! Para verificar o fecho transitivo direto do grafo, é preciso que ele seja direcionado"<<endl;
+   }
+   else
+   {
+    vector<char> resultado = AuxDireto(id_no);
+    cout<<"Resultado do Transitivo Direto:"<<endl;
+     for(char a :resultado)
+        {
+            cout<<a<<", ";
+        }
+    return resultado;
+   }
+  
     return {};
 }
 
@@ -210,4 +224,40 @@ vector<char> Grafo::periferia() {
 vector<char> Grafo::vertices_de_articulacao() {
     cout<<"Metodo nao implementado"<<endl;
     return {};
+}
+vector<char> Grafo::AuxDireto(char id_no){
+    int atual =-1;
+    vector<char> adicionado;
+    int tamlista = lista_adj.size();
+    
+ for(int i=0;i<tamlista&&atual==-1;i++) //procura o vértice na lista de adj;
+    {
+     if(lista_adj.at(i)->id==id_no)
+     {
+        atual=i;
+     }
+    }
+    if(atual==-1)
+    {
+        cout<<"Nó não está incluso na lista de adj"<<endl;
+        return;
+    }
+  int tamanhoVizinhos = lista_adj.at(atual)->arestas.size();
+  int presente=0;
+  for(int j=0;j<tamanhoVizinhos;j++)
+  {
+    for(char elemento: adicionado)
+    {
+    if( lista_adj.at(atual)->arestas.at(j)->id_no_alvo==elemento)
+    {
+        presente = 1;
+    }
+    }
+    if(presente==0)
+    {
+        adicionado.push_back( lista_adj.at(atual)->arestas.at(j)->id_no_alvo);
+    }
+    presente=0;
+  }
+  return adicionado;
 }

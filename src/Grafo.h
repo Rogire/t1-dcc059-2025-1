@@ -34,7 +34,8 @@ public:
     //criado pelo grupo
     int indice_no(char id);
     void imprimir_grafo();
-
+    vector<char> AuxDireto(char id_no);
+    
 
     int ordem;
     bool in_direcionado;
