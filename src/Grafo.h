@@ -19,7 +19,6 @@
 
 #include "Hash.h"
 #include "par.h"
-
 using namespace std;
 
 class Grafo

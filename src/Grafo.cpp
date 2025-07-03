@@ -274,18 +274,19 @@ void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
                      break;
                  }
              }
- 
-            if (!ParAt->getValue())
-            {
-                ParAt->setValue(true);
-                PROF(ParAt->getKey(), listaAdjRet);
 
-                if(add)
-                    listaAdjRet->push_back(par(strAtual, at->peso));
-            }
+             if(add)
+                listaAdjRet->push_back(par(strAtual, at->peso));
+
+             if (!ParAt->getValue())
+             {
+                 ParAt->setValue(true);
+                 PROF(ParAt->getKey(), listaAdjRet);
+             }
         }            
     }
 }
+
 
 Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 {
