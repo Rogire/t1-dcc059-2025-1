@@ -12,10 +12,17 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <queue>
+#include <list>
+#include <utility> 
+#include <limits.h>
+
+
 using namespace std;
+
 class Grafo {
 public:
-    Grafo(const string& nome_arquivo);
+    Grafo();
     ~Grafo();
 
     vector<char> fecho_transitivo_direto(char id_no); // a
@@ -29,18 +36,22 @@ public:
     int diametro(); // h 2
     vector<char> centro(); // h 3
     vector<char> periferia(); // h 4
-    vector<char> vertices_de_articulacao(); // i
+   
     
     //criado pelo grupo
+    void montar_Grafo_por_arquivo(const string& nome_arquivo);
     int indice_no(char id);
     void imprimir_grafo();
-
+    
+    
+    
 
     int ordem;
     bool in_direcionado;
     bool in_ponderado_aresta;
     bool in_ponderado_vertice;
     vector<No*> lista_adj;
+   
 };
 
 
