@@ -72,77 +72,72 @@ Grafo::~Grafo() {
 void Grafo::montar_Grafo_por_arquivo(const string& nome_arquivo) {
     ifstream arquivo(nome_arquivo); // Abre o arquivo
 
-    // Verifica se o arquivo foi aberto corretamente
     if (!arquivo.is_open()) {
         cerr << "Erro ao abrir o arquivo!" << endl;
-        exit(-1); // Encerra o programa em caso de erro
+        exit(-1);
     }
 
-    // Lê do arquivo as informações iniciais:
-    // se é direcionado, se tem peso nos vértices, se tem peso nas arestas, e a ordem (número de nós)
+    // Lê as informações iniciais
     arquivo >> in_direcionado >> in_ponderado_vertice >> in_ponderado_aresta >> ordem;
 
-    // Lê os nós do grafo
+    // Limpa qualquer caractere sobrando antes de começar a ler linhas
+    arquivo.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    // Leitura robusta dos nós
     for (int i = 0; i < ordem; i++) {
         No* x;
-        char id;
-        arquivo >> id; // lê o identificador do nó
-        
+        string linha;
+        getline(arquivo, linha);
 
-        // Se o grafo tem peso nos vértices, lê o peso também
+        istringstream iss(linha);
+        char id;
+        iss >> id;
+
         if (in_ponderado_vertice) {
-            int peso;
-            arquivo >> peso;
-            x = new No(id, peso); // cria nó com peso
+            int peso = 0;
+          
+            x = new No(id, peso);
         } else {
-            x = new No(id); // cria nó sem peso
+            x = new No(id);
         }
 
-        lista_adj.push_back(x); // adiciona o nó na lista de adjacência
+        lista_adj.push_back(x);
     }
 
-    // Consome o caractere de nova linha após os nós para preparar leitura das arestas
+    // Lê as arestas
     string linha;
-    getline(arquivo, linha);
-
-    // Lê as arestas enquanto houver linhas no arquivo
     while (getline(arquivo, linha)) {
-        istringstream iss(linha); // cria um stream a partir da linha para facilitar a leitura
-
+        istringstream iss(linha);
         char v1, v2;
-        iss >> v1 >> v2; // lê os identificadores dos nós que formam a aresta
+        iss >> v1 >> v2;
 
-        // Busca o índice dos nós na lista de adjacência usando a função auxiliar
         int idx_v1 = indice_no(v1);
         int idx_v2 = indice_no(v2);
 
-        // Verifica se os índices foram encontrados, senão mostra erro e ignora essa aresta
         if (idx_v1 == -1 || idx_v2 == -1) {
             cerr << "Erro: nó não encontrado no grafo: " << v1 << " ou " << v2 << endl;
-            continue; // pula para próxima linha
+            continue;
         }
 
-        // Caso o grafo tenha peso nas arestas, lê o peso
         if (in_ponderado_aresta) {
             int peso;
-            iss >> peso;
+            if (!(iss >> peso)) {
+               
+                continue;
+            }
 
-            // Cria uma aresta do v1 para v2 com peso
             Aresta* final = new Aresta(v2, peso);
             lista_adj[idx_v1]->arestas.push_back(final);
 
-            // Se o grafo não for direcionado, adiciona a aresta inversa (v2 para v1)
             if (!in_direcionado) {
                 Aresta* origem = new Aresta(v1, peso);
                 lista_adj[idx_v2]->arestas.push_back(origem);
             }
 
-        } else { // Se não tem peso nas arestas
-            // Cria aresta do v1 para v2 sem peso
+        } else {
             Aresta* final = new Aresta(v2);
             lista_adj[idx_v1]->arestas.push_back(final);
 
-            // Se o grafo não for direcionado, adiciona aresta inversa (v2 para v1)
             if (!in_direcionado) {
                 Aresta* origem = new Aresta(v1);
                 lista_adj[idx_v2]->arestas.push_back(origem);
@@ -150,14 +145,14 @@ void Grafo::montar_Grafo_por_arquivo(const string& nome_arquivo) {
         }
     }
 
-    // Ordena as arestas de cada nó pelo id do nó de destino
+    // Ordena as arestas de cada nó pelo id do destino
     for (No* i : lista_adj) {
         std::sort(i->arestas.begin(), i->arestas.end(), [](Aresta* a, Aresta* b) {
             return a->id_no_alvo < b->id_no_alvo;
         });
     }
 
-    // Imprime o grafo após a leitura
+    // Imprime o grafo
     imprimir_grafo();
 }
 
