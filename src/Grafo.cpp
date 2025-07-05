@@ -178,6 +178,7 @@ void Grafo::montar_Grafo_por_arquivo(const string &nome_arquivo)
     }
 
     // Imprime o grafo após a leitura
+    std::cout << "aaaaaaaaaa\n";
     imprimir_grafo();
 }
 
@@ -287,7 +288,6 @@ void Grafo::PROF(No *NoAt, std::vector<par<std::string,int>> *listaAdjRet)
     }
 }
 
-
 Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 {
     std::cout << "Rodou inicio func\n";
@@ -321,6 +321,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
         std::cout << s.getKey() << " " << s.getValue() << " \n";
 
     std::ofstream arq = this->grafoParaArquivo(listaArestas, "CaminhamentoProfundidade.txt");
+
     Grafo *ret = new Grafo();
     ret->montar_Grafo_por_arquivo("CaminhamentoProfundidade.txt");
 
@@ -362,6 +363,45 @@ std::ofstream Grafo::grafoParaArquivo(std::vector<par<std::string, int>>& listaA
     else
         for (auto t : listaArestas)
             temp << t.getKey() << "\n";
+
+    temp.close();
+
+    return temp;
+}
+
+std::ofstream Grafo::grafoParaArquivo(Grafo &grafo, std::string nomeArq)
+{
+    std::ofstream temp(nomeArq);
+
+    if (!temp.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return std::ofstream();
+    }
+
+    // cabeçalho do txt
+    temp << grafo.in_direcionado << " " << grafo.in_ponderado_aresta << " " << grafo.in_ponderado_vertice << std::endl;
+    temp << ordem << std::endl;
+
+    for (No *node : grafo.lista_adj)
+    {
+        temp << node->id;
+
+        if (node->peso != 0)
+            temp << " " << node->peso;
+
+        temp << "\n";
+    }
+
+    // arestas do vértice
+    if (grafo.in_ponderado_aresta)
+        for(No* node : grafo.lista_adj)
+            for (Aresta* t : node->arestas)
+                temp << node->id << " " << t->id_no_alvo << " "<< t->peso << "\n";
+    else
+        for (No *node : grafo.lista_adj)
+            for (Aresta *t : node->arestas)
+                temp << node->id << " " << t->id_no_alvo << "\n";
 
     temp.close();
 

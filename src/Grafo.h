@@ -44,6 +44,7 @@ public:
     int indice_no(char id);
     void imprimir_grafo();
     std::ofstream grafoParaArquivo(std::vector<par<std::string, int>>& listaArestas, std::string nomeArq);
+    std::ofstream grafoParaArquivo(Grafo& grafo, std::string nomeArq);
     void calula_excentricidade();
 
     HASH<No*, bool>* Hash_n;
