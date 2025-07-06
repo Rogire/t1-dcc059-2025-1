@@ -18,7 +18,8 @@
 #include <limits.h>
 #include <limits>
 
-
+#include "Hash.h"
+#include "par.h"
 using namespace std;
 
 class Grafo {
@@ -43,9 +44,11 @@ public:
     void montar_Grafo_por_arquivo(const string& nome_arquivo);
     int indice_no(char id);
     void imprimir_grafo();
-    
-    
-    
+    int excentricidade(char id_no_a);
+    std::ofstream grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq);
+    std::ofstream grafoParaArquivo(Grafo &grafo, std::string nomeArq);
+    HASH<No *, bool> *Hash_n;
+    void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
 
     int ordem;
     bool in_direcionado;
