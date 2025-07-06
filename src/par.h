@@ -10,8 +10,8 @@ public:
     par(K k, V v) : key(k), value(v) {}
     par() {}
 
-    K getKey() { return key; };
-    V getValue() { return value; };
+    K& getKey() { return key; };
+    V& getValue() { return value; };
 
     void setKey(K k) { key = k; };
     void setValue(V v) { value = v; };
