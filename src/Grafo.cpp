@@ -288,8 +288,79 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
 }
 
 vector<char> Grafo::caminho_minimo_floyd(char id_no, char id_no_b) {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
+    // Verifica se o grafo é direcionado
+    if (in_direcionado) {
+        cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos direcionados." << endl;
+        return {};
+    }
+    // Verifica se o grafo é ponderado
+    if (!in_ponderado_aresta) {
+        cout << "ERRO: O algoritmo de Floyd-Warshall requer um grafo ponderado." << endl;
+        return {};
+    }
+    // Verifica se o grafo é vazio
+    if (lista_adj.empty()) {
+        cout << "ERRO: O grafo está vazio." << endl;
+        return {};
+    }
+    // Verifica se os nós existem no grafo
+    int idx_no = indice_no(id_no);
+    int idx_no_b = indice_no(id_no_b);
+    if (idx_no == -1 || idx_no_b == -1) {
+        cout << "ERRO: Um ou ambos os nós não existem no grafo." << endl;
+        return {};
+    }
+
+    int ordem = (int)lista_adj.size();
+    vector<vector<int>> dist(ordem, vector<int>(ordem, INT_MAX));
+    vector<vector<int>> pai(ordem, vector<int>(ordem, -1));
+
+    // Inicializa distâncias e predecessores
+    for (int i = 0; i < ordem; i++) {
+        dist[i][i] = 0;
+        for (Aresta* aresta : lista_adj[i]->arestas) {
+            int idx_vizinho = indice_no(aresta->id_no_alvo);
+            if (idx_vizinho != -1) {
+                dist[i][idx_vizinho] = aresta->peso;
+                pai[i][idx_vizinho] = i;
+            }
+        }
+    }
+
+    // Floyd-Warshall
+    for (int k = 0; k < ordem; k++) {
+        for (int i = 0; i < ordem; i++) {
+            for (int j = 0; j < ordem; j++) {
+                if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                    pai[i][j] = pai[k][j];
+                }
+            }
+        }
+    }
+
+    // Se não há caminho
+    if (dist[idx_no][idx_no_b] == INT_MAX) {
+        cout << "Não há caminho entre os nós " << id_no << " e " << id_no_b << "." << endl;
+        return {};
+    }
+
+    // Reconstrução do caminho mínimo
+    vector<char> caminho;
+    int atual = idx_no_b;
+    while (atual != idx_no) {
+        if (atual == -1) {
+            cout << "ERRO: Caminho mínimo não encontrado entre os nós " << id_no << " e " << id_no_b << "." << endl;
+            return {};
+        }
+        caminho.push_back(lista_adj[atual]->id);
+        atual = pai[idx_no][atual];
+    }
+    caminho.push_back(lista_adj[idx_no]->id);
+    std::reverse(caminho.begin(), caminho.end());
+
+    
+    return caminho;
 }
 
 //feito
