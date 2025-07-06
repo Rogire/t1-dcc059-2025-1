@@ -152,12 +152,12 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             std::cout << "Centrais:\n";
             for (char c : centro)
-                std::cout << c << " ";
+                std::cout << c << ",";
             std::cout << "\n";
 
             std::cout << "Periféricos:\n";
             for (char c : periferia)
-                std::cout << c << " ";
+                std::cout << c << ",";
             std::cout << "\n";
 
             cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
