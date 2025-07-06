@@ -15,7 +15,7 @@
 using namespace std;
 class Grafo {
 public:
-    Grafo(const string& nome_arquivo);
+    Grafo();
     ~Grafo();
 
     vector<char> fecho_transitivo_direto(char id_no); // a
@@ -32,9 +32,11 @@ public:
     vector<char> vertices_de_articulacao(); // i
     
     //criado pelo grupo
+    void montar_Grafo_por_arquivo(const string& nome_arquivo);
     int indice_no(char id);
     void imprimir_grafo();
     vector<char> AuxDireto(char id_no);
+    bool EhConexo(char a);
     
 
     int ordem;
