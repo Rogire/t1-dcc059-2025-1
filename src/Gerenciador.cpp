@@ -156,10 +156,25 @@ void Gerenciador::comandos(Grafo* grafo) {
             vector<char> centro = grafo->centro();
             vector<char> periferia = grafo->periferia();
 
-            cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
+            std::cout << "raio: " << raio << '\n';
+            std::cout << "diametro: " << diametro << '\n';
 
-            if(pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt")) {
-                cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
+            std::cout << "Centrais:\n";
+            for (char c : centro)
+                std::cout << c << ",";
+            std::cout << "\n";
+
+            std::cout << "Periféricos:\n";
+            for (char c : periferia)
+                std::cout << c << ",";
+            std::cout << "\n";
+
+            cout << "Metodo de impressao em tela nao implementado" << endl
+                 << endl;
+
+            if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
+            {
+                cout << "Metodo de impressao em arquivo nao implementado" << endl;
             }
 
             break;
