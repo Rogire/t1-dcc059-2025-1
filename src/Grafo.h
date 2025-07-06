@@ -43,7 +43,7 @@ public:
     void montar_Grafo_por_arquivo(const string &nome_arquivo);
     int indice_no(char id);
     void imprimir_grafo();
-
+    int excentricidade(char id_no_a);
 
     std::ofstream grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq);
     std::ofstream grafoParaArquivo(Grafo& grafo, std::string nomeArq);
@@ -59,7 +59,6 @@ public:
     bool in_ponderado_vertice;
     vector<No *> lista_adj;
     int distancia_no_atual;
-    vector<pair<char, int>> excentricidade;
 };
 
 #endif // GRAFO_H

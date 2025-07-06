@@ -192,9 +192,72 @@ vector<char> Grafo::fecho_transitivo_indireto(char id_no) {
     return {};
 }
 
-vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
+vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b)
+{
+    char origem = id_no_a;
+    char destino = id_no_b;
+
+    int idx_origem = indice_no(origem);
+    int idx_destino = indice_no(destino);
+
+    if (idx_origem == -1 || idx_destino == -1)
+    {
+        cout << "Erro: No de origem ou destino nao encontrado." << endl;
+        return {};
+    }
+
+    int n = lista_adj.size();
+    vector<int> dist(n, INT_MAX);    // Vetor de distâncias (inicializa com infinito)
+    vector<int> anterior(n, -1);     // Vetor de predecessores
+    vector<bool> visitado(n, false); // Vetor de nós já visitados
+
+    dist[idx_origem] = 0;
+
+    // Fila de prioridade mínima (par: distancia, indice do no)
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> fila;
+    fila.push({0, idx_origem});
+
+    while (!fila.empty())
+    {
+        int u = fila.top().second;
+        fila.pop();
+
+        if (visitado[u])
+            continue;
+        visitado[u] = true;
+
+        for (Aresta *aresta : lista_adj[u]->arestas)
+        {
+            int v = indice_no(aresta->id_no_alvo);
+            int peso = (in_ponderado_aresta) ? aresta->peso : 1;
+
+            if (dist[u] + peso < dist[v])
+            {
+                dist[v] = dist[u] + peso;
+                anterior[v] = u;
+                fila.push({dist[v], v});
+            }
+        }
+    }
+
+    // Verifica se existe caminho
+    if (dist[idx_destino] == INT_MAX)
+    {
+        cout << "Nao existe caminho entre " << origem << " e " << destino << endl;
+        return {};
+    }
+
+    // Reconstrói o caminho
+    vector<char> caminho;
+    for (int v = idx_destino; v != -1; v = anterior[v])
+    {
+        caminho.push_back(lista_adj[v]->id);
+    }
+
+    // O caminho foi construído de trás pra frente, então invertemos
+    reverse(caminho.begin(), caminho.end());
+
+    return caminho;
 }
 
 vector<char> Grafo::caminho_minimo_floyd(char id_no, char id_no_b) {
@@ -408,22 +471,68 @@ std::ofstream Grafo::grafoParaArquivo(Grafo &grafo, std::string nomeArq)
     return temp;
 }
 
+int Grafo::excentricidade(char id_no_a)
+{
+    vector<char> caminho_minimo;
+    int maior{0};
+
+    for (No *n : this->lista_adj)
+    {
+        if(n->id != id_no_a)
+        {
+            caminho_minimo = this->caminho_minimo_dijkstra(id_no_a, n->id);
+
+            if (caminho_minimo.size() > maior)
+                maior = caminho_minimo.size();
+        }
+    }
+    return maior-1;
+}
 int Grafo::raio() {
-    cout<<"Metodo nao implementado"<<endl;
-    return 0;
+    int menor{INT_MAX}, atual{};
+
+    for (No *node : this->lista_adj)
+    {
+        atual = this->excentricidade(node->id);
+        if (atual < menor)
+            menor = atual;
+    }
+    return menor;
 }
 
 int Grafo::diametro() {
-    cout<<"Metodo nao implementado"<<endl;
-    return 0;
+
+    int maior{0}, atual{};
+
+    for(No* node : this->lista_adj)
+    {
+        atual = this->excentricidade(node->id);
+
+        if(atual > maior)
+            maior = atual;
+    }
+
+    return maior;
 }
 
 vector<char> Grafo::centro() {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
+    vector<char> ret;
+    int r = this->raio();
+
+    for(No *node : this->lista_adj)
+        if(this->excentricidade(node->id) == r)
+            ret.push_back(node->id);
+
+    return ret;
 }
 
 vector<char> Grafo::periferia() {
-    cout<<"Metodo nao implementado"<<endl;
-    return {};
+    vector<char> ret;
+    int d = this->diametro();
+
+    for (No *node : this->lista_adj)
+        if (this->excentricidade(node->id) == d)
+            ret.push_back(node->id);
+
+    return ret;
 }

@@ -139,25 +139,32 @@ void Gerenciador::comandos(Grafo* grafo) {
         }
 
         case 'h': {
-            char a, b;
-            cin >> a >> b;
-            std::cout << "A excentricidade entre "<< a << " e "<<b << " é:\n";
-            std::cout << grafo->calcula_excentricidade_dist(a,b,'E')<<"\n";
-            std::cout << "A Distância entre " << a << " e " << b << " é:\n";
-            std::cout << grafo->calcula_excentricidade_dist(a, b, 'D') << "\n";
 
-            /*
+            
+            
             int raio = grafo->raio();
             int diametro = grafo->diametro();
             vector<char> centro = grafo->centro();
             vector<char> periferia = grafo->periferia();
+
+            std::cout << "raio: " << raio << '\n';
+            std::cout << "diametro: " << diametro << '\n';
+
+            std::cout << "Centrais:\n";
+            for (char c : centro)
+                std::cout << c << " ";
+            std::cout << "\n";
+
+            std::cout << "Periféricos:\n";
+            for (char c : periferia)
+                std::cout << c << " ";
+            std::cout << "\n";
 
             cout<<"Metodo de impressao em tela nao implementado"<<endl<<endl;
 
             if(pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt")) {
                 cout<<"Metodo de impressao em arquivo nao implementado"<<endl;
             }
-            */
 
             break;
         }
