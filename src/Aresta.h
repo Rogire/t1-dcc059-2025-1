@@ -9,7 +9,7 @@ public:
 
     char id_no_alvo;
     int peso;
-    
+    bool retorno;
 };
 
 
