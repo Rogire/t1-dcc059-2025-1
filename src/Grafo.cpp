@@ -1,4 +1,5 @@
 #include "Grafo.h"
+#include <queue>
 
 // Função que retorna o índice do nó com identificador 'id' na lista de adjacência
 int Grafo::indice_no(char id) {
@@ -49,8 +50,14 @@ void Grafo::imprimir_grafo() {
     cout << endl; // Linha extra após imprimir todo o grafo
 }
 
+Grafo::Grafo(){
+    ordem=0;
+    in_direcionado=0;
+    in_ponderado_aresta=0;
+    in_ponderado_vertice=0;
+}
 // Construtor do grafo que recebe o nome do arquivo com os dados do grafo
-Grafo::Grafo(const string& nome_arquivo) {
+void Grafo::montar_Grafo_por_arquivo(const string& nome_arquivo) {
     ifstream arquivo(nome_arquivo); // Abre o arquivo
 
     // Verifica se o arquivo foi aberto corretamente
@@ -153,13 +160,13 @@ Grafo::~Grafo() {
 }
 
 vector<char> Grafo::fecho_transitivo_direto(char id_no) {
-   if(!in_direcionado)
+   if(!in_direcionado)//verifica se o grafo não é direcionado
    {
     cout<<"O grafo não é direcionado! Para verificar o fecho transitivo direto do grafo, é preciso que ele seja direcionado"<<endl;
    }
    else
    {
-    vector<char> resultado = AuxDireto(id_no);
+    vector<char> resultado = AuxDireto(id_no);//chama função auxiliar, retorna o fecho transitivo direto deste nó
     cout<<"Resultado do Transitivo Direto:"<<endl;
      for(char a :resultado)
         {
@@ -192,7 +199,56 @@ Grafo * Grafo::arvore_geradora_minima_prim(vector<char> ids_nos) {
 }
 
 Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
-    cout<<"Metodo nao implementado"<<endl;
+    if(in_direcionado)
+    {
+        cout<<"O grafo não pode ser direcionado!"<<endl;
+        return nullptr;
+    }
+    if(!in_ponderado_aresta)
+    {
+        cout<<"O grafo deve possuir arestas ponderadas!"<<endl;
+    }
+    //Inicialmente, apenas verifica se o subgrafo é conexo;
+    Grafo* subgrafo = new Grafo();//Começo a criar o subgrafo só com os nós presentes no vector ids_nos
+    subgrafo->ordem = ids_nos.size();
+    subgrafo->in_direcionado = this->in_direcionado;
+    subgrafo->in_ponderado_aresta = this->in_ponderado_aresta;
+    subgrafo->in_ponderado_vertice = this->in_ponderado_vertice;
+    for(char id : ids_nos) 
+    { //adiciona os vertices no subgrafo
+    int indiceAux = this->indice_no(id);
+    if(indiceAux != -1)
+     {
+        No* novono = new No(lista_adj[indiceAux]->id, lista_adj[indiceAux]->peso);
+        subgrafo->lista_adj.push_back(novono);
+    }
+}
+ for(char id : ids_nos) {// adiciona as arestas no subgrafo
+        int indiceAux = this->indice_no(id);
+        if(indiceAux == -1)// verifica se o indice aux existe no original
+        {
+            continue;
+        }
+        for(Aresta* aresta : lista_adj[indiceAux]->arestas) {// Só adiciona se o destino também está em ids_nos
+            if(std::find(ids_nos.begin(), ids_nos.end(), aresta->id_no_alvo) != ids_nos.end())
+             { // Adiciona a aresta ao nó correspondente no subgrafo
+                int indiceSub = subgrafo->indice_no(id);
+                if(indiceSub != -1) // verifica se o indice existe no subgrafo
+                {
+                        subgrafo->lista_adj[indiceSub]->arestas.push_back(new Aresta(aresta->id_no_alvo, aresta->peso));
+                }
+            }
+        }
+    }
+    //Verifica se é conexo
+    bool conexo = subgrafo->EhConexo(ids_nos[0]);
+    if(!conexo)// se não é conexo, retorna erro
+    {
+        cout<<" O subgrafo não é conexo! Não é possivel fazer a AGM"<<endl;
+        return nullptr;
+    }
+    //terminar kruskal em si
+    
     return nullptr;
 }
 
@@ -226,8 +282,8 @@ vector<char> Grafo::vertices_de_articulacao() {
     return {};
 }
 vector<char> Grafo::AuxDireto(char id_no){
-    int atual =-1;
-    vector<char> adicionado;
+    int atual =-1; // valor numerico do local que o nó está;Usado para testar se ele está ou não na lista de adj
+    vector<char> adicionado; // vetor que é retornado no fim, todo nó que é FTD de id_no é incluso aqui
     int tamlista = lista_adj.size();
     
  for(int i=0;i<tamlista&&atual==-1;i++) //procura o vértice na lista de adj;
@@ -240,24 +296,54 @@ vector<char> Grafo::AuxDireto(char id_no){
     if(atual==-1)
     {
         cout<<"Nó não está incluso na lista de adj"<<endl;
-        return;
+        return {};
     }
-  int tamanhoVizinhos = lista_adj.at(atual)->arestas.size();
-  int presente=0;
-  for(int j=0;j<tamanhoVizinhos;j++)
-  {
-    for(char elemento: adicionado)
+     queue<char> fila; // fila dos nós, utilzado para fazer a busca em largura
+     fila.push(id_no);
+    while(!fila.empty())
     {
-    if( lista_adj.at(atual)->arestas.at(j)->id_no_alvo==elemento)
-    {
-        presente = 1;
+     char primeiro = fila.front(); // pega o primeiro da fila(mais velho) pra depois tira-lo( usa pra fazer a comparação) 
+     fila.pop();
+     
+     atual =-1;
+     for(int i =0;i<tamlista && atual ==-1;i++) // verifica se primeiro esta na lista de adj, e depois faz com que atual == primeiro
+     {
+        if(lista_adj.at(i)->id==primeiro)
+        {
+        atual =i;
+        }
+     }
+     if(atual==-1)
+     {
+        continue; /// se primeiro nao estiver , pula este while
+     }
+       int tamanhoVizinhos = lista_adj.at(atual)->arestas.size();
+        for(int j = 0; j < tamanhoVizinhos; j++) { // percorre os vizinhos do no atual
+            char vizinho = lista_adj.at(atual)->arestas.at(j)->id_no_alvo;//vizinho atual
+            // Só adiciona se ainda não estiver em adicionado
+            bool ja_adicionado = false;
+            for(char elemento : adicionado) {// procura o vizinho na lista de adicionado
+                if(vizinho == elemento) { // se ja estiver adicionado, para
+                    ja_adicionado = true;
+                    break;
+                }
+            }
+            if(!ja_adicionado) {/// se não estiver adicionado, poe na fila e no vetor final(adicionado)
+                fila.push(vizinho);
+                adicionado.push_back(vizinho);
+            }
     }
-    }
-    if(presente==0)
-    {
-        adicionado.push_back( lista_adj.at(atual)->arestas.at(j)->id_no_alvo);
-    }
-    presente=0;
-  }
+}
   return adicionado;
+}
+
+bool Grafo::EhConexo(char id_no)// usa a função AuxDireto para ver se o grafo é conexo
+{
+    int tamanho = lista_adj.size() -1;//tamanho = ordem do grafo-1(pra tirar o proprio nó que será comparado)
+    vector <char> visitados = AuxDireto(id_no);// retorna oo FTD do nó
+    if(visitados.size()!= tamanho)// verifica se o FTD do nó é igual o tamanho, se não for, o grafo não é conexo
+    {
+    return false;
+    }
+    return true;
 }
