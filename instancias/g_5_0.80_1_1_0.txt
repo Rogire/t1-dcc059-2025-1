@@ -2,14 +2,14 @@
 5
 b
 c
+a
 e
 d
-a
-b c 29
-d c 8
-c d 40
-b a 13
-b e 8
-d a 5
-c b 31
-a d 22
+a c 39
+d a 34
+a d 5
+b d 49
+d e 22
+a e 41
+e c 40
+e a 49
