@@ -181,7 +181,7 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
             {
-                std::ofstream arquivo = grafo->h_paraArquivo(par(raio, diametro), par(&centro, &periferia), "raio_diametro_centro_periferia.txt");
+                std::ofstream arquivo = grafo->h_paraArquivo(par(raio, diametro), par<vector<char>*,vector<char>*>(&centro, &periferia), "raio_diametro_centro_periferia.txt");
             }
 
             break;
