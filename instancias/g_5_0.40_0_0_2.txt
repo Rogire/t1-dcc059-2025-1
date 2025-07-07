@@ -1,11 +1,11 @@
 0 0 0
 5
-c
 b
 e
 a
 d
+c
 c d
-a b
 d a
-a e
+b c
+c e
