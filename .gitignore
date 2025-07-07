@@ -1,2 +1,9 @@
 
 TESTE.txt
+agm_kruskal.txt
+agm_prim.txt
+arvore_caminhamento_profundidade.txt
+caminho_minimo_dijkstra.txt
+caminho_minimo_floyd.txt
+fecho_trans_dir.txt
+*.txt
