@@ -8,6 +8,13 @@
 
 using namespace std;
 
+/*OBSERVACAO: A ordem do cabecalho no nosso projeto ficou: Direcao, Aresta , Vertice. Essa mudnaca ocorreu devido 
+ao fato das novas instancias estarem considerando o segundo termo da cabecalho como aresta*/
+
+
+
+
+
 // Função que retorna o índice do nó com identificador 'id' na lista de adjacência
 int Grafo::indice_no(char id) {
     // Percorre toda a lista de nós
@@ -87,7 +94,7 @@ void Grafo::montar_Grafo_por_arquivo(const string& nome_arquivo) {
     }
 
     // Lê as informações iniciais
-    arquivo >> in_direcionado >> in_ponderado_vertice >> in_ponderado_aresta >> ordem;
+    arquivo >> in_direcionado >> in_ponderado_aresta >> in_ponderado_vertice>> ordem;
 
     // Limpa qualquer caractere sobrando antes de começar a ler linhas
     arquivo.ignore(numeric_limits<streamsize>::max(), '\n');
