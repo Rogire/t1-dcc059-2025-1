@@ -17,9 +17,13 @@
 #include <utility> 
 #include <limits.h>
 #include <limits>
+#include <unordered_map>
+#include <unordered_set>
 
-#include "Hash.h"
-#include "par.h"
+
+
+
+
 using namespace std;
 
 class Grafo {
@@ -33,7 +37,7 @@ public:
     vector<char> caminho_minimo_floyd(char id_no, char id_no_b); // d
     Grafo* arvore_geradora_minima_prim(vector<char> ids_nos); // e
     Grafo* arvore_geradora_minima_kruskal(vector<char> ids_nos); // f
-    Grafo* arvore_caminhamento_profundidade(char id_no); // g
+    Grafo* arvore_caminhamento_profundidade(int id_no); // g
     int raio(); // h 1
     int diametro(); // h 2
     vector<char> centro(); // h 3
@@ -44,18 +48,17 @@ public:
     void montar_Grafo_por_arquivo(const string& nome_arquivo);
     int indice_no(char id);
     void imprimir_grafo();
-    int excentricidade(char id_no_a);
-    std::ofstream grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq);
-    std::ofstream grafoParaArquivo(Grafo &grafo, std::string nomeArq);
-    HASH<No *, bool> *Hash_n;
-    void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
+    void calula_excentricidade();
+    
+    
 
     int ordem;
     bool in_direcionado;
     bool in_ponderado_aresta;
     bool in_ponderado_vertice;
     vector<No*> lista_adj;
-   
+    int distancia_no_atual;
+    vector<pair<char, int>> excentricidade;
 };
 
 
