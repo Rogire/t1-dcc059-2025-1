@@ -175,7 +175,8 @@ vector<char> Grafo::fecho_transitivo_direto(char id_no) {
    else
    {
     vector<char> resultado = AuxDireto(id_no);//chama função auxiliar, retorna o fecho transitivo direto deste nó
-  
+    //remove o próprio id_no caso ele esteja entre o FTD  
+    resultado.erase(std::remove(resultado.begin(), resultado.end(), id_no), resultado.end());
     return resultado;
    }
   
@@ -694,19 +695,19 @@ Grafo* Grafo::arvore_geradora_minima_prim(vector<char> ids_nos) {
 //Funciona
 Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) 
 {
-    if(in_direcionado)
+    if(in_direcionado)// verifica se o grafo é direcionado
     {
         cout<<"O grafo não pode ser direcionado!"<<endl;
         return nullptr;
     }
-    if(!in_ponderado_aresta)
+    if(!in_ponderado_aresta) // verifica se o grafo é ponderado nas arestas 
     {
         cout<<"O grafo deve possuir arestas ponderadas!"<<endl;
         return nullptr;
     }
     //Inicialmente, apenas verifica se o subgrafo é conexo;
     Grafo* subgrafo = new Grafo();//Começo a criar o subgrafo só com os nós presentes no vector ids_nos
-    subgrafo->ordem = ids_nos.size();
+    subgrafo->ordem = ids_nos.size();// insere dados do grafo atual no subgrafo e verificação, apenas o que vem do ids_nos
     subgrafo->in_direcionado = this->in_direcionado;
     subgrafo->in_ponderado_aresta = this->in_ponderado_aresta;
     subgrafo->in_ponderado_vertice = this->in_ponderado_vertice;
@@ -731,8 +732,7 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
              { // Adiciona a aresta ao nó correspondente no subgrafo
                 int indiceSub = subgrafo->indice_no(id);
                 if(indiceSub != -1) // verifica se o indice existe no subgrafo
-                {
-                        
+                {      
                         subgrafo->lista_adj[indiceSub]->arestas.push_back(new Aresta(aresta->id_no_alvo, aresta->peso));
                 }
             }
@@ -746,17 +746,17 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
         delete subgrafo;
         return nullptr;
     }
-    //terminar kruskal em si
-    vector<pair<No,Aresta>> listaArestas; // lista com Arestas cordenadas e o primeiro no(por que arestas nao tem o no de origem </3 )
-    for (No* no : subgrafo->lista_adj) {
-    for (Aresta* aresta : no->arestas) {
+    //Agora, definido que o Grafo é conexo, começa o KRUSKAL
+    vector<pair<No,Aresta>> listaArestas; // lista com Arestas cordenadas e o no de origem;
+    for (No* no : subgrafo->lista_adj) {//para cada no do subgrafo
+    for (Aresta* aresta : no->arestas) {// para cada aresta de cada no
         listaArestas.push_back(make_pair(*no,*aresta));
     }
 }
    std::sort(listaArestas.begin(), listaArestas.end(),
     [](const pair<No, Aresta>& a, const pair<No, Aresta>& b) {
         return a.second.peso < b.second.peso;
-    });
+    });// organiza a listaArestas de forma crescente
     vector<pair<No*,char>> subarvores;// guarda o no e qual subarvore ele esta presente no momento
     for(char a : ids_nos)// poe o no na subarvore igual o seu id
     {
@@ -769,9 +769,9 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
     AGM->in_ponderado_aresta = this->in_ponderado_aresta;
     AGM->in_ponderado_vertice = this->in_ponderado_vertice;
     for(char id : ids_nos) 
-    { //adiciona os vertices no subgrafo
+    { //adiciona os vertices do subgrafo
     int indiceAux = subgrafo->indice_no(id);
-    if(indiceAux != -1)
+    if(indiceAux != -1)// pra caso de erro
      {
         No* novono = new No(subgrafo->lista_adj[indiceAux]->id, subgrafo->lista_adj[indiceAux]->peso);
         AGM->lista_adj.push_back(novono);
@@ -780,7 +780,7 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos)
   int contador = 0;
 int num_vertices = ids_nos.size();
 
-while (contador < num_vertices - 1 && !listaArestas.empty()) {
+while (contador < num_vertices - 1 && !listaArestas.empty()) {// enquanto contador n for menor q o numero e vertices ou ate quando a lista de arestas acabar, verifica e adicona o menor caminho possivel
     // Pega a menor aresta
     Aresta a = listaArestas.at(0).second;
     char u_id = listaArestas.at(0).first.id;
@@ -801,7 +801,7 @@ while (contador < num_vertices - 1 && !listaArestas.empty()) {
             AGM->lista_adj[idx_u]->arestas.push_back(new Aresta(v_id, a.peso));
         int idx_v = AGM->indice_no(v_id);
         if (idx_v != -1)
-            AGM->lista_adj[idx_v]->arestas.push_back(new Aresta(u_id, a.peso)); // se não direcionado
+            AGM->lista_adj[idx_v]->arestas.push_back(new Aresta(u_id, a.peso));
 
         // Unir as subárvores: todos que estavam em sub_v passam a ser sub_u
         for (auto& par : subarvores) {
@@ -1137,13 +1137,13 @@ vector<char> Grafo::AuxDireto(char id_no){
     }
      queue<char> fila; // fila dos nós, utilzado para fazer a busca em largura
      fila.push(id_no);
-    while(!fila.empty())
+    while(!fila.empty())//equanto a fila não está vazia
     {
      char primeiro = fila.front(); // pega o primeiro da fila(mais velho) pra depois tira-lo( usa pra fazer a comparação) 
      fila.pop();
      
      atual =-1;
-     for(int i =0;i<tamlista && atual ==-1;i++) // verifica se primeiro esta na lista de adj, e depois faz com que atual == primeiro
+     for(int i =0;i<tamlista && atual ==-1;i++) // verifica se primeiro esta na lista de adj, e depois faz com que atual == local onde o nó está na lista de adj
      {
         if(lista_adj.at(i)->id==primeiro)
         {
@@ -1154,7 +1154,7 @@ vector<char> Grafo::AuxDireto(char id_no){
      {
         continue; /// se primeiro nao estiver , pula este while
      }
-       int tamanhoVizinhos = lista_adj.at(atual)->arestas.size();
+       int tamanhoVizinhos = lista_adj.at(atual)->arestas.size();// quantos nos o nó atual é adjacente
         for(int j = 0; j < tamanhoVizinhos; j++) { // percorre os vizinhos do no atual
             char vizinho = lista_adj.at(atual)->arestas.at(j)->id_no_alvo;//vizinho atual
             // Só adiciona se ainda não estiver em adicionado
@@ -1174,8 +1174,8 @@ vector<char> Grafo::AuxDireto(char id_no){
   return adicionado;
 }
 
-bool Grafo::EhConexo(char id_no){
-    int tamanho = lista_adj.size();
+bool Grafo::EhConexo(char id_no){// utiliza a função DiretoAux para retornar os FTD de um nó do grafo, se esse FTD tem o mesmo tamanho da quantidade de nós presente no grafo então ele é conexo, pois é possivel chegar em todos os nós do grafo a partir de qualquer um (Ele tem que ser não direcionado para essa verificação funcionar) 
+    int tamanho = lista_adj.size();// int para guardar o tamanho da lista de adj
     vector <char> visitados = AuxDireto(id_no);
 
     // Remove o nó inicial dos visitados, se estiver presente
