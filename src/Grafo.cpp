@@ -877,7 +877,7 @@ Grafo* Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
 // A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
 // repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se
 // o inverso da aresta atual já está lista, se não está, adiciona
-void Grafo::PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet)//O(n)
+void Grafo::PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet)
 {
     for (Aresta *at : NoAt->arestas)
     {
@@ -987,80 +987,99 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
 
 std::ofstream Grafo::grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq)
 {
-    std::ofstream temp(nomeArq);
+    std::ofstream arq(nomeArq);
 
-    if (!temp.is_open())
+    if (!arq.is_open())
     {
         std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
         return std::ofstream();
     }
 
     // cabeçalho do txt
-    temp << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
-    temp << ordem << std::endl;
+    arq << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
+    arq << ordem << std::endl;
 
     for (No *node : this->lista_adj)
     {
-        temp << node->id;
+        arq << node->id;
 
         if (node->peso != 0)
-            temp << " " << node->peso;
+            arq << " " << node->peso;
 
-        temp << "\n";
+        arq << "\n";
     }
 
     // arestas do vértice
     if (this->in_ponderado_aresta)
         for (auto t : listaArestas)
-            temp << t.getKey() << " " << t.getValue() << "\n";
+            arq << t.getKey() << " " << t.getValue() << "\n";
     else
         for (auto t : listaArestas)
-            temp << t.getKey() << "\n";
+            arq << t.getKey() << "\n";
 
-    temp.close();
+    arq.close();
 
-    return temp;
+    return arq;
 }
 
-std::ofstream Grafo::grafoParaArquivo(Grafo &grafo, std::string nomeArq)
+std::ofstream Grafo::grafoParaArquivo(const Grafo &grafo, std::string nomeArq)
 {
-    std::ofstream temp(nomeArq);
+    std::ofstream arq(nomeArq);
 
-    if (!temp.is_open())
+    if (!arq.is_open())
     {
         std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
         return std::ofstream();
     }
 
     // cabeçalho do txt
-    temp << grafo.in_direcionado << " " << grafo.in_ponderado_aresta << " " << grafo.in_ponderado_vertice << std::endl;
-    temp << ordem << std::endl;
+    arq << grafo.in_direcionado << " " << grafo.in_ponderado_aresta << " " << grafo.in_ponderado_vertice << std::endl;
+    arq << ordem << std::endl;
 
     for (No *node : grafo.lista_adj)
     {
-        temp << node->id;
+        arq << node->id;
 
         if (node->peso != 0)
-            temp << " " << node->peso;
+            arq << " " << node->peso;
 
-        temp << "\n";
+        arq << "\n";
     }
 
     // arestas do vértice
     if (grafo.in_ponderado_aresta)
         for (No *node : grafo.lista_adj)
             for (Aresta *t : node->arestas)
-                temp << node->id << " " << t->id_no_alvo << " " << t->peso << "\n";
+                arq << node->id << " " << t->id_no_alvo << " " << t->peso << "\n";
     else
         for (No *node : grafo.lista_adj)
             for (Aresta *t : node->arestas)
-                temp << node->id << " " << t->id_no_alvo << "\n";
+                arq << node->id << " " << t->id_no_alvo << "\n";
 
-    temp.close();
+    arq.close();
 
-    return temp;
+    return arq;
 }
 
+std::ofstream Grafo::vetorParaArquivo(const std::vector<char> &vetor, std::string nomeArq)
+{
+    std::ofstream arq(nomeArq);
+
+    if (!arq.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return std::ofstream();
+    }
+
+    for(char c : vetor)
+    {
+        arq << c << ",";
+    }
+
+    arq.close();
+
+    return arq;
+}
 int Grafo::excentricidade(char id_no_a)
 {
     vector<char> caminho_minimo;
@@ -1077,6 +1096,30 @@ int Grafo::excentricidade(char id_no_a)
         }
     }
     return maior - 1;
+}
+
+std::ofstream Grafo::h_paraArquivo(par<int, int> raio_diametro, par<std::vector<char>*, std::vector<char>*> vetores, std::string nomeArq)
+{
+    std::ofstream arq(nomeArq);
+
+    if (!arq.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return std::ofstream();
+    }
+    arq << raio_diametro.getKey() << "\n";
+    arq << raio_diametro.getValue() << "\n";
+
+    for (auto c : *(vetores.getKey()))
+        arq << c << ",";
+
+    arq << "\n";
+
+    for (auto c : *(vetores.getValue()))
+        arq << c << ",";
+
+    arq.close();
+    return arq;
 }
 
 int Grafo::raio()
