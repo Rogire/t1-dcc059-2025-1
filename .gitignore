@@ -6,4 +6,6 @@ arvore_caminhamento_profundidade.txt
 caminho_minimo_dijkstra.txt
 caminho_minimo_floyd.txt
 fecho_trans_dir.txt
-*.txt
+fecho_trans_indir.txt
+main
+raio_diametro_centro_periferia.txt
