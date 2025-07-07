@@ -1,5 +1,5 @@
 #include "Grafo.h"
-#include <queue>
+
 
 // Função que retorna o índice do nó com identificador 'id' na lista de adjacência
 int Grafo::indice_no(char id) {
@@ -223,6 +223,7 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
         subgrafo->lista_adj.push_back(novono);
     }
 }
+
  for(char id : ids_nos) {// adiciona as arestas no subgrafo
         int indiceAux = this->indice_no(id);
         if(indiceAux == -1)// verifica se o indice aux existe no original
@@ -235,6 +236,7 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
                 int indiceSub = subgrafo->indice_no(id);
                 if(indiceSub != -1) // verifica se o indice existe no subgrafo
                 {
+                        
                         subgrafo->lista_adj[indiceSub]->arestas.push_back(new Aresta(aresta->id_no_alvo, aresta->peso));
                 }
             }
@@ -245,11 +247,79 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     if(!conexo)// se não é conexo, retorna erro
     {
         cout<<" O subgrafo não é conexo! Não é possivel fazer a AGM"<<endl;
+        delete subgrafo;
         return nullptr;
     }
     //terminar kruskal em si
+    vector<pair<No,Aresta>> listaArestas; // lista com Arestas cordenadas e o primeiro no(por que arestas nao tem o no de origem </3 )
+    for (No* no : subgrafo->lista_adj) {
+    for (Aresta* aresta : no->arestas) {
+        listaArestas.push_back(make_pair(*no,*aresta));
+    }
+}
+    std::sort(listaArestas.begin(),listaArestas.end(),[](const Aresta& a, const Aresta& b) 
+    { //Ordena lista a partir do peso
+        return a.peso < b.peso;
+    });
+    vector<pair<No*,char>> subarvores;// guarda o no e qual subarvore ele esta presente no momento
+    for(char a : ids_nos)// poe o no na subarvore igual o seu id
+    {
+        No* inserir = subgrafo->lista_adj[subgrafo->indice_no(a)];
+        subarvores.push_back(make_pair(inserir,a));
+    }
+    Grafo* AGM = new Grafo();//Começo a criar o subgrafo só com os nós presentes no vector ids_nos
+    AGM->ordem = ids_nos.size();
+    AGM->in_direcionado = this->in_direcionado;
+    AGM->in_ponderado_aresta = this->in_ponderado_aresta;
+    AGM->in_ponderado_vertice = this->in_ponderado_vertice;
+    for(char id : ids_nos) 
+    { //adiciona os vertices no subgrafo
+    int indiceAux = subgrafo->indice_no(id);
+    if(indiceAux != -1)
+     {
+        No* novono = new No(subgrafo->lista_adj[indiceAux]->id, subgrafo->lista_adj[indiceAux]->peso);
+        AGM->lista_adj.push_back(novono);
+    }
+}
+  int contador = 0;
+int num_vertices = ids_nos.size();
+
+while (contador < num_vertices - 1 && !listaArestas.empty()) {
+    // Pega a menor aresta
+    Aresta a = listaArestas.at(0).second;
+    char u_id = listaArestas.at(0).first.id;
+    char v_id = a.id_no_alvo;
+
+    // Descobre a "subárvore" de u e v
+    char sub_u = 0, sub_v = 0;
+    for (auto& par : subarvores) {
+        if (par.first->id == u_id) sub_u = par.second;
+        if (par.first->id == v_id) sub_v = par.second;
+    }
+
+    // Se estão em subárvores diferentes, pode unir
+    if (sub_u != sub_v) {
+        // Adiciona a aresta à AGM
+        int idx_u = AGM->indice_no(u_id);
+        if (idx_u != -1)
+            AGM->lista_adj[idx_u]->arestas.push_back(new Aresta(v_id, a.peso));
+        int idx_v = AGM->indice_no(v_id);
+        if (idx_v != -1)
+            AGM->lista_adj[idx_v]->arestas.push_back(new Aresta(u_id, a.peso)); // se não direcionado
+
+        // Unir as subárvores: todos que estavam em sub_v passam a ser sub_u
+        for (auto& par : subarvores) {
+            if (par.second == sub_v)
+                par.second = sub_u;
+        }
+        contador++;
+    }
+
+    // Remove a aresta processada
+    listaArestas.erase(listaArestas.begin());
+}
     
-    return nullptr;
+    return AGM;
 }
 
 Grafo * Grafo::arvore_caminhamento_profundidade(char id_no) {

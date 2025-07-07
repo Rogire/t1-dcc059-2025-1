@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <queue>
 using namespace std;
 class Grafo {
 public:
