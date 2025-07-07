@@ -207,6 +207,7 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     if(!in_ponderado_aresta)
     {
         cout<<"O grafo deve possuir arestas ponderadas!"<<endl;
+        return nullptr;
     }
     //Inicialmente, apenas verifica se o subgrafo é conexo;
     Grafo* subgrafo = new Grafo();//Começo a criar o subgrafo só com os nós presentes no vector ids_nos
@@ -224,25 +225,36 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     }
 }
 
- for(char id : ids_nos) {// adiciona as arestas no subgrafo
-        int indiceAux = this->indice_no(id);
-        if(indiceAux == -1)// verifica se o indice aux existe no original
-        {
-            continue;
-        }
-        for(Aresta* aresta : lista_adj[indiceAux]->arestas) {// Só adiciona se o destino também está em ids_nos
-            if(std::find(ids_nos.begin(), ids_nos.end(), aresta->id_no_alvo) != ids_nos.end())
-             { // Adiciona a aresta ao nó correspondente no subgrafo
+for(char id : ids_nos) {
+    int indiceAux = this->indice_no(id);
+    if(indiceAux == -1) continue;
+    for(Aresta* aresta : lista_adj[indiceAux]->arestas) {
+        if(std::find(ids_nos.begin(), ids_nos.end(), aresta->id_no_alvo) != ids_nos.end()) {
+            // Só adiciona se id < id_no_alvo para evitar duplicidade
+            if (id < aresta->id_no_alvo) {
                 int indiceSub = subgrafo->indice_no(id);
-                if(indiceSub != -1) // verifica se o indice existe no subgrafo
-                {
-                        
-                        subgrafo->lista_adj[indiceSub]->arestas.push_back(new Aresta(aresta->id_no_alvo, aresta->peso));
+                int indiceSubAlvo = subgrafo->indice_no(aresta->id_no_alvo);
+                if(indiceSub != -1 && indiceSubAlvo != -1) {
+                    subgrafo->lista_adj[indiceSub]->arestas.push_back(new Aresta(aresta->id_no_alvo, aresta->peso));
+                    subgrafo->lista_adj[indiceSubAlvo]->arestas.push_back(new Aresta(id, aresta->peso));
                 }
             }
         }
     }
+}
+    
     //Verifica se é conexo
+    ///TESTES
+    cout<<"grafo atual"<<endl;
+    imprimir_grafo();
+    cout << "Subgrafo montado para teste de conexidade:" << endl;
+subgrafo->imprimir_grafo();
+vector<char> visitados = subgrafo->AuxDireto(ids_nos[0]);
+cout << "Visitados a partir de " << ids_nos[0] << ": ";
+for (char v : visitados) cout << v << " ";
+cout << endl;
+
+////
     bool conexo = subgrafo->EhConexo(ids_nos[0]);
     if(!conexo)// se não é conexo, retorna erro
     {
@@ -257,9 +269,9 @@ Grafo * Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
         listaArestas.push_back(make_pair(*no,*aresta));
     }
 }
-    std::sort(listaArestas.begin(),listaArestas.end(),[](const Aresta& a, const Aresta& b) 
-    { //Ordena lista a partir do peso
-        return a.peso < b.peso;
+   std::sort(listaArestas.begin(), listaArestas.end(),
+    [](const pair<No, Aresta>& a, const pair<No, Aresta>& b) {
+        return a.second.peso < b.second.peso;
     });
     vector<pair<No*,char>> subarvores;// guarda o no e qual subarvore ele esta presente no momento
     for(char a : ids_nos)// poe o no na subarvore igual o seu id
@@ -318,7 +330,8 @@ while (contador < num_vertices - 1 && !listaArestas.empty()) {
     // Remove a aresta processada
     listaArestas.erase(listaArestas.begin());
 }
-    
+    cout<<"Lista de adj do Grafo AGM";
+    AGM->imprimir_grafo();
     return AGM;
 }
 
@@ -407,13 +420,14 @@ vector<char> Grafo::AuxDireto(char id_no){
   return adicionado;
 }
 
-bool Grafo::EhConexo(char id_no)// usa a função AuxDireto para ver se o grafo é conexo
-{
-    int tamanho = lista_adj.size() -1;//tamanho = ordem do grafo-1(pra tirar o proprio nó que será comparado)
-    vector <char> visitados = AuxDireto(id_no);// retorna oo FTD do nó
-    if(visitados.size()!= tamanho)// verifica se o FTD do nó é igual o tamanho, se não for, o grafo não é conexo
-    {
-    return false;
-    }
+bool Grafo::EhConexo(char id_no){
+    int tamanho = lista_adj.size();
+    vector <char> visitados = AuxDireto(id_no);
+
+    // Remove o nó inicial dos visitados, se estiver presente
+    visitados.erase(std::remove(visitados.begin(), visitados.end(), id_no), visitados.end());
+
+    if(visitados.size() != tamanho - 1)
+        return false;
     return true;
 }
