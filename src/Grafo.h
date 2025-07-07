@@ -50,7 +50,10 @@ public:
     void imprimir_grafo();
     int excentricidade(char id_no_a);
     std::ofstream grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq);
-    std::ofstream grafoParaArquivo(Grafo &grafo, std::string nomeArq);
+    std::ofstream grafoParaArquivo(const Grafo &grafo, std::string nomeArq);
+    std::ofstream vetorParaArquivo(const std::vector<char>& vetor, std::string nomeArq);
+    std::ofstream h_paraArquivo(par<int,int> raio_diametro,par<std::vector<char>*, std::vector<char>*> vetores, std::string nomeArq);
+
     HASH<No *, bool> *Hash_n;
     void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
 
