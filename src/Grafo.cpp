@@ -1,6 +1,12 @@
 #include "Grafo.h"
+#include <unordered_map>
+#include <unordered_set>
+#include <limits>
+#include <queue>
+#include <algorithm>
+#include <iostream>
 
-
+using namespace std;
 
 // Função que retorna o índice do nó com identificador 'id' na lista de adjacência
 int Grafo::indice_no(char id) {
@@ -286,14 +292,7 @@ vector<char> Grafo::fecho_transitivo_indireto(char id_no) {
     return resultado;
 }
 
-#include <unordered_map>
-#include <unordered_set>
-#include <limits>
-#include <queue>
-#include <algorithm>
-#include <iostream>
 
-using namespace std;
 
 vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
     // Função auxiliar para encontrar um No* pelo id
@@ -383,71 +382,178 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
     return caminho;
 }
 
+vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
+{
+    // Verifica se o grafo é direcionado
+    if (in_direcionado)
+    {
+        cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos direcionados." << endl;
+        return {};
+    }
+    // Verifica se o grafo é vazio
+    if (lista_adj.empty())
+    {
+        cout << "ERRO: O grafo está vazio." << endl;
+        return {};
+    }
+    // Verifica se os nós existem no grafo
+    int idx_no_a = indice_no(id_no_a);
+    int idx_no_b = indice_no(id_no_b);
+    if (idx_no_a == -1 || idx_no_b == -1)
+    {
+        cout << "ERRO: Um ou ambos os nós não existem no grafo." << endl;
+        return {};
+    }
 
+    int ordem = (int)lista_adj.size();
+    vector<vector<int>> dist(ordem, vector<int>(ordem, INT_MAX));
+    vector<vector<int>> pai(ordem, vector<int>(ordem, -1));
 
-
-//n esta funcionado pra valores negativos de aresta (trava)
-vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b) {
-    
-    char origem = id_no_a;
-    char destino = id_no_b;
-
-    int n = lista_adj.size();
-    vector<vector<int>> dist(n, vector<int>(n, INT_MAX));  // Matriz de distâncias
-    vector<vector<int>> next(n, vector<int>(n, -1));       // Matriz de predecessores
-
-    // Inicializa as distâncias com os pesos das arestas
-    for (int i = 0; i < n; i++) {
+    // Inicializa distâncias e predecessores
+    for (int i = 0; i < ordem; i++)
+    {
         dist[i][i] = 0;
-        next[i][i] = i;
-
-        for (Aresta* aresta : lista_adj[i]->arestas) {
-            int j = indice_no(aresta->id_no_alvo);
-            int peso = (in_ponderado_aresta) ? aresta->peso : 1;
-            dist[i][j] = peso;
-            next[i][j] = j;
+        for (Aresta *aresta : lista_adj[i]->arestas)
+        {
+            int idx_vizinho = indice_no(aresta->id_no_alvo);
+            if (idx_vizinho != -1)
+            {
+                dist[i][idx_vizinho] = aresta->peso;
+                pai[i][idx_vizinho] = i;
+            }
         }
     }
 
-    // Algoritmo de Floyd-Warshall
-    for (int k = 0; k < n; k++) {
-        for (int i = 0; i < n; i++) {
-            if (dist[i][k] == INT_MAX) continue;
-            for (int j = 0; j < n; j++) {
-                if (dist[k][j] == INT_MAX) continue;
-                if (dist[i][k] + dist[k][j] < dist[i][j]) {
+    // Floyd-Warshall
+    for (int k = 0; k < ordem; k++)
+    {
+        for (int i = 0; i < ordem; i++)
+        {
+            for (int j = 0; j < ordem; j++)
+            {
+                if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] + dist[k][j] < dist[i][j])
+                {
                     dist[i][j] = dist[i][k] + dist[k][j];
-                    next[i][j] = next[i][k];
+                    pai[i][j] = pai[k][j];
                 }
             }
         }
     }
 
-    int idx_origem = indice_no(origem);
-    int idx_destino = indice_no(destino);
-
-    if (idx_origem == -1 || idx_destino == -1) {
-        cout << "Erro: No de origem ou destino nao encontrado." << endl;
+    // Se não há caminho
+    if (dist[idx_no_a][idx_no_b] == INT_MAX)
+    {
+        cout << "Não há caminho entre os nós " << id_no_a << " e " << id_no_b << "." << endl;
         return {};
     }
 
-    if (next[idx_origem][idx_destino] == -1) {
-        cout << "Nao existe caminho entre " << origem << " e " << destino << endl;
-        return {};
-    }
-
-    // Reconstrói o caminho
+    // Reconstrução do caminho mínimo
     vector<char> caminho;
-    int atual = idx_origem;
-    while (atual != idx_destino) {
+    int atual = idx_no_b;
+    while (atual != idx_no_a)
+    {
+        if (atual == -1)
+        {
+            cout << "ERRO: Caminho mínimo não encontrado entre os nós " << id_no_a << " e " << id_no_b << "." << endl;
+            return {};
+        }
         caminho.push_back(lista_adj[atual]->id);
-        atual = next[atual][idx_destino];
+        atual = pai[idx_no_a][atual];
     }
-    caminho.push_back(lista_adj[idx_destino]->id);
+    caminho.push_back(lista_adj[idx_no_a]->id);
+    std::reverse(caminho.begin(), caminho.end());
 
-    
+    // Exibe o caminho mínimo encontrado
+    cout << "Caminho minimo de " << id_no_a << " para " << id_no_b << ": ";
+    for (char id : caminho)
+    {
+        cout << id << " ";
+    }
+    cout << endl;
 
-    distancia_no_atual = dist[idx_origem][idx_destino];
+    return caminho;
+}
+
+vector<char> Grafo::caminho_minimo_floyd_sem_print(char id_no_a, char id_no_b)
+{
+    // Verifica se o grafo é direcionado
+    if (in_direcionado)
+    {
+        cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos direcionados." << endl;
+        return {};
+    }
+    // Verifica se o grafo é vazio
+    if (lista_adj.empty())
+    {
+        cout << "ERRO: O grafo está vazio." << endl;
+        return {};
+    }
+    // Verifica se os nós existem no grafo
+    int idx_no_a = indice_no(id_no_a);
+    int idx_no_b = indice_no(id_no_b);
+    if (idx_no_a == -1 || idx_no_b == -1)
+    {
+        cout << "ERRO: Um ou ambos os nós não existem no grafo." << endl;
+        return {};
+    }
+
+    int ordem = (int)lista_adj.size();
+    vector<vector<int>> dist(ordem, vector<int>(ordem, INT_MAX));
+    vector<vector<int>> pai(ordem, vector<int>(ordem, -1));
+
+    // Inicializa distâncias e predecessores
+    for (int i = 0; i < ordem; i++)
+    {
+        dist[i][i] = 0;
+        for (Aresta *aresta : lista_adj[i]->arestas)
+        {
+            int idx_vizinho = indice_no(aresta->id_no_alvo);
+            if (idx_vizinho != -1)
+            {
+                dist[i][idx_vizinho] = aresta->peso;
+                pai[i][idx_vizinho] = i;
+            }
+        }
+    }
+
+    // Floyd-Warshall
+    for (int k = 0; k < ordem; k++)
+    {
+        for (int i = 0; i < ordem; i++)
+        {
+            for (int j = 0; j < ordem; j++)
+            {
+                if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] + dist[k][j] < dist[i][j])
+                {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                    pai[i][j] = pai[k][j];
+                }
+            }
+        }
+    }
+
+    // Se não há caminho
+    if (dist[idx_no_a][idx_no_b] == INT_MAX)
+    {
+        cout << "Não há caminho entre os nós " << id_no_a << " e " << id_no_b << "." << endl;
+        return {};
+    }
+
+    // Reconstrução do caminho mínimo
+    vector<char> caminho;
+    int atual = idx_no_b;
+    while (atual != idx_no_a)
+    {
+        if (atual == -1)
+        {
+            cout << "ERRO: Caminho mínimo não encontrado entre os nós " << id_no_a << " e " << id_no_b << "." << endl;
+            return {};
+        }
+        caminho.push_back(lista_adj[atual]->id);
+        atual = pai[idx_no_a][atual];
+    }
+    caminho.push_back(lista_adj[idx_no_a]->id);
+    std::reverse(caminho.begin(), caminho.end());
 
     return caminho;
 }
@@ -767,135 +873,261 @@ Grafo* Grafo::arvore_geradora_minima_kruskal(vector<char> ids_nos) {
     return agm;
 }
 
-
-// N Funciona
-Grafo* Grafo::arvore_caminhamento_profundidade(int id_no) {
-    int indice_inicio = indice_no(id_no);
-    
-
-    Grafo* arvore = new Grafo();
-    arvore->in_direcionado = this->in_direcionado;
-    arvore->in_ponderado_aresta = this->in_ponderado_aresta;
-    arvore->in_ponderado_vertice = this->in_ponderado_vertice;
-
-    // Copia os nos e reseta marcas no grafo original
-    for (No* no : lista_adj) {
-        arvore->lista_adj.push_back(new No(no->id, no->peso));
-        no->marca = false;
-    }
-
-    // Lambda DFS recursivo
-    auto dfs = [&](auto&& dfs, int indice) -> void {
-        lista_adj[indice]->marca = true;
-        int id_atual = lista_adj[indice]->id;  
-
-        for (Aresta* aresta : lista_adj[indice]->arestas) {
-            int indice_vizinho = indice_no(aresta->id_no_alvo);
-            if (indice_vizinho == -1) continue;
-
-            if (!lista_adj[indice_vizinho]->marca) {
-                // Aresta de arvore
-                int idx_origem_arvore = arvore->indice_no(id_atual);
-                int idx_destino_arvore = arvore->indice_no(aresta->id_no_alvo);
-
-                arvore->lista_adj[idx_origem_arvore]->arestas.push_back(
-                    new Aresta(aresta->id_no_alvo, aresta->peso)
-                );
-
-                if (!in_direcionado) {
-                    arvore->lista_adj[idx_destino_arvore]->arestas.push_back(
-                        new Aresta(id_atual, aresta->peso)
-                    );
-                }
-
-                dfs(dfs, indice_vizinho);
-
-            } else {
-                // Aresta de retorno
-                int idx_origem_arvore = arvore->indice_no(id_atual);
-                int idx_destino_arvore = arvore->indice_no(aresta->id_no_alvo);
-
-                Aresta* aresta_retorno = new Aresta(aresta->id_no_alvo, aresta->peso);
-                aresta_retorno->retorno = true;
-                arvore->lista_adj[idx_origem_arvore]->arestas.push_back(aresta_retorno);
-
-                if (!in_direcionado) {
-                    Aresta* aresta_retorno_simetrica = new Aresta(id_atual, aresta->peso);
-                    aresta_retorno_simetrica->retorno = true;
-                    arvore->lista_adj[idx_destino_arvore]->arestas.push_back(aresta_retorno_simetrica);
-                }
-            }
-        }
-    };
-
-    dfs(dfs, indice_inicio);
-
-    // Reseta marcas no grafo original
-    for (No* no : lista_adj) {
-        no->marca = false;
-    }
-
-    return arvore;
-}
-
-
-//Funciona
-void Grafo::calula_excentricidade(){
-    excentricidade.clear();  
-
-    for (No* i : lista_adj) {
-        int exc = INT_MIN;
-        char id = i->id;
-
-        for (No* j : lista_adj) {
-            if (i->id == j->id) continue;
-
-            caminho_minimo_floyd(i->id, j->id);
-
-            if (distancia_no_atual > exc) {
-                exc = distancia_no_atual;
-            }
+// Adiciona as arestas lista no formato que elas vão ser escritas no grafo "x y"
+// A adição das arestas é feita fora da verificação se já passou ou não, pra evitar
+// repetições de arestas invertidas ex: "a b" e "b a", ele percorre e compara se
+// o inverso da aresta atual já está lista, se não está, adiciona
+void Grafo::PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet)//O(n)
+{
+    for (Aresta *at : NoAt->arestas)
+    {
+        par<No *, bool> *ParAt = this->Hash_n->get(at->id_no_alvo);
+        if (!ParAt)
+        {
+            std::cerr << "Erro: nó alvo " << at->id_no_alvo << " não encontrado na hash!" << std::endl;
+            continue;
         }
 
-        excentricidade.push_back({id, exc});
+        bool add{};
+        std::string strAtual = std::string(1, NoAt->id) + " " + std::string(1, ParAt->getKey()->id);
+
+        if (this->in_direcionado == 0)
+        {
+            for (par<std::string, int> p : *listaAdjRet)
+            {
+                add = true;
+
+                if (p.getKey() == strAtual)
+                {
+                    add = false;
+                    break;
+                }
+
+                // evita duplicatas (a b, e b a)
+                if (p.getKey().size() == 3 && strAtual.size() == 3)
+                    if (strAtual[0] == p.getKey()[2] && strAtual[2] == p.getKey()[0])
+                    {
+                        add = false;
+                        break;
+                    }
+            }
+            if (add)
+                listaAdjRet->push_back(par(strAtual, at->peso));
+
+            // se não passou pelo vertice atual
+            if (!ParAt->getValue())
+            {
+                ParAt->setValue(true);
+                // PROF(vertice Atual, lista Strings)
+                PROF(ParAt->getKey(), listaAdjRet);
+            }
+        }
+        else
+        {
+            for (par<std::string, int> p : *listaAdjRet)
+            {
+                add = true;
+
+                if (p.getKey() == strAtual)
+                {
+                    add = false;
+                    break;
+                }
+            }
+
+            if (add)
+                listaAdjRet->push_back(par(strAtual, at->peso));
+
+            if (!ParAt->getValue())
+            {
+                ParAt->setValue(true);
+                PROF(ParAt->getKey(), listaAdjRet);
+            }
+        }
+    }
+}
+
+Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
+{
+    this->Hash_n = new HASH<No *, bool>(this->lista_adj);
+    this->Hash_n->InitHash(this->lista_adj, false);
+
+    std::vector<par<std::string, int>> listaArestas;
+
+    auto *comeco = this->Hash_n->get(id_no);
+    if (!comeco)
+    {
+        std::cerr << "Erro: nó inicial " << id_no << " não encontrado na hash!" << std::endl;
+        return nullptr;
     }
 
-    std::sort(excentricidade.begin(), excentricidade.end(),
-              [](const pair<char, int>& a, const pair<char, int>& b) {
-                  return a.second < b.second;
-              });
-  
-}
-//Funciona
-int Grafo::raio() {
-         
-    return excentricidade[0].second;
-}
-//Funciona
-int Grafo::diametro() {
-    
-    return excentricidade.back().second;
-}
-//Funciona
-vector<char> Grafo::centro() {
-    vector<char> centro;
-    if (excentricidade.empty()) return centro;
-    int menorPeso =  raio();
-    for (const auto& par : excentricidade) {
-        if (par.second == menorPeso)
-            centro.push_back(par.first);
+    comeco->setValue(true);
+
+    if (!comeco->getKey()->arestas.empty())
+    {
+        char idInic = comeco->getKey()->arestas[0]->id_no_alvo;
+        char idNoIn = comeco->getKey()->id;
+
+        std::string strIn = std::string(1, idNoIn) + " " + std::string(1, idInic);
+        listaArestas.push_back(par(strIn, comeco->getKey()->arestas[0]->peso));
+        PROF(comeco->getKey(), &listaArestas);
     }
-    return centro;
-}
-//Funciona
-vector<char> Grafo::periferia() {
-    vector<char> perifericos;
-    if (excentricidade.empty()) return perifericos;
-    int maiorPeso = diametro();
-    for (const auto& par : excentricidade) {
-        if (par.second == maiorPeso)
-            perifericos.push_back(par.first);
+
+    std::ofstream arq = this->grafoParaArquivo(listaArestas, "CaminhamentoProfundidade.txt");
+
+    Grafo *ret = new Grafo();
+    ret->montar_Grafo_por_arquivo("CaminhamentoProfundidade.txt");
+
+    // considerando que o exercício foi feito pensando para rodar em ambientes UNIX
+    system("rm CaminhamentoProfundidade.txt");
+
+    this->Hash_n->~HASH();
+    return ret;
+};
+
+std::ofstream Grafo::grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq)
+{
+    std::ofstream temp(nomeArq);
+
+    if (!temp.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return std::ofstream();
     }
-    return perifericos;
+
+    // cabeçalho do txt
+    temp << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
+    temp << ordem << std::endl;
+
+    for (No *node : this->lista_adj)
+    {
+        temp << node->id;
+
+        if (node->peso != 0)
+            temp << " " << node->peso;
+
+        temp << "\n";
+    }
+
+    // arestas do vértice
+    if (this->in_ponderado_aresta)
+        for (auto t : listaArestas)
+            temp << t.getKey() << " " << t.getValue() << "\n";
+    else
+        for (auto t : listaArestas)
+            temp << t.getKey() << "\n";
+
+    temp.close();
+
+    return temp;
 }
 
+std::ofstream Grafo::grafoParaArquivo(Grafo &grafo, std::string nomeArq)
+{
+    std::ofstream temp(nomeArq);
+
+    if (!temp.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return std::ofstream();
+    }
+
+    // cabeçalho do txt
+    temp << grafo.in_direcionado << " " << grafo.in_ponderado_aresta << " " << grafo.in_ponderado_vertice << std::endl;
+    temp << ordem << std::endl;
+
+    for (No *node : grafo.lista_adj)
+    {
+        temp << node->id;
+
+        if (node->peso != 0)
+            temp << " " << node->peso;
+
+        temp << "\n";
+    }
+
+    // arestas do vértice
+    if (grafo.in_ponderado_aresta)
+        for (No *node : grafo.lista_adj)
+            for (Aresta *t : node->arestas)
+                temp << node->id << " " << t->id_no_alvo << " " << t->peso << "\n";
+    else
+        for (No *node : grafo.lista_adj)
+            for (Aresta *t : node->arestas)
+                temp << node->id << " " << t->id_no_alvo << "\n";
+
+    temp.close();
+
+    return temp;
+}
+
+int Grafo::excentricidade(char id_no_a)
+{
+    vector<char> caminho_minimo;
+    int maior{0};
+
+    for (No *n : this->lista_adj)
+    {
+        if (n->id != id_no_a)
+        {
+            caminho_minimo = this->caminho_minimo_floyd_sem_print(id_no_a, n->id);
+
+            if (caminho_minimo.size() > maior)
+                maior = caminho_minimo.size();
+        }
+    }
+    return maior - 1;
+}
+
+int Grafo::raio()
+{
+    int menor{INT_MAX}, atual{};
+
+    for (No *node : this->lista_adj)
+    {
+        atual = this->excentricidade(node->id);
+        if (atual < menor)
+            menor = atual;
+    }
+    return menor;
+}
+
+int Grafo::diametro()
+{
+
+    int maior{0}, atual{};
+
+    for (No *node : this->lista_adj)
+    {
+        atual = this->excentricidade(node->id);
+
+        if (atual > maior)
+            maior = atual;
+    }
+
+    return maior;
+}
+
+vector<char> Grafo::centro()
+{
+    vector<char> ret;
+    int r = this->raio();
+
+    for (No *node : this->lista_adj)
+        if (this->excentricidade(node->id) == r)
+            ret.push_back(node->id);
+
+    return ret;
+}
+
+vector<char> Grafo::periferia()
+{
+    vector<char> ret;
+    int d = this->diametro();
+
+    for (No *node : this->lista_adj)
+        if (this->excentricidade(node->id) == d)
+            ret.push_back(node->id);
+
+    return ret;
+}
