@@ -368,6 +368,12 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
         cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos direcionados." << endl;
         return {};
     }
+    // Verifica se o grafo é ponderado nas arestas
+    if (!in_ponderado_aresta)
+    {
+        cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos não ponderado nas arestas." << endl;
+        return {};
+    }
     // Verifica se o grafo é vazio
     if (lista_adj.empty())
     {
@@ -458,6 +464,11 @@ vector<char> Grafo::caminho_minimo_floyd_sem_print(char id_no_a, char id_no_b)
     if (in_direcionado)
     {
         cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos direcionados." << endl;
+        return {};
+    }
+    if (!in_ponderado_aresta)
+    {
+        cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos não ponderado nas arestas." << endl;
         return {};
     }
     // Verifica se o grafo é vazio
