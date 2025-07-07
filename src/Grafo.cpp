@@ -1094,7 +1094,6 @@ int Grafo::raio()
 
 int Grafo::diametro()
 {
-
     int maior{0}, atual{};
 
     for (No *node : this->lista_adj)
