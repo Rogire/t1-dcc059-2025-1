@@ -5,10 +5,10 @@ e
 d
 c
 b
-c d
-e b
-c b
-d a
 a b
-a c
-d e
+b e
+b c
+a e
+e c
+c d
+a d
