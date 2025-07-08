@@ -130,7 +130,10 @@ void Gerenciador::comandos(Grafo* grafo) {
 
                 vector<char> ids = get_conjunto_ids(grafo,tam);
                 Grafo* arvore_geradora_minima_kruskal = grafo->arvore_geradora_minima_kruskal(ids);
-                arvore_geradora_minima_kruskal->imprimir_grafo();
+                if(arvore_geradora_minima_kruskal == nullptr)
+                  break;
+                else
+                  arvore_geradora_minima_kruskal->imprimir_grafo();
 
                 if(pergunta_imprimir_arquivo("agm_kruskal.txt")) {
                     std::ofstream arquivo = arvore_geradora_minima_kruskal->grafoParaArquivo(*arvore_geradora_minima_kruskal, "agm_kruskal.txt");
@@ -149,7 +152,7 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             char id_no = get_id_entrada();
             Grafo* arvore_caminhamento_profundidade = grafo->arvore_caminhamento_profundidade(id_no);
-            arvore_caminhamento_profundidade->imprimir_grafo();
+            
 
             if(pergunta_imprimir_arquivo("arvore_caminhamento_profundidade.txt")) {
                 std::ofstream arquivo = arvore_caminhamento_profundidade->grafoParaArquivo(*arvore_caminhamento_profundidade, "arvore_caminhamento_profundidade.txt");
@@ -181,7 +184,7 @@ void Gerenciador::comandos(Grafo* grafo) {
 
             if (pergunta_imprimir_arquivo("raio_diametro_centro_periferia.txt"))
             {
-                std::ofstream arquivo = grafo->h_paraArquivo(par(raio, diametro), par<vector<char>*,vector<char>*>(&centro, &periferia), "raio_diametro_centro_periferia.txt");
+                std::ofstream arquivo = grafo->h_paraArquivo(par<int,int>(raio, diametro), par<vector<char>*,vector<char>*>(&centro, &periferia), "raio_diametro_centro_periferia.txt");
             }
 
             break;
