@@ -53,6 +53,10 @@ public:
     std::ofstream grafoParaArquivo(const Grafo &grafo, std::string nomeArq);
     std::ofstream vetorParaArquivo(const std::vector<char>& vetor, std::string nomeArq);
     std::ofstream h_paraArquivo(par<int,int> raio_diametro,par<std::vector<char>*, std::vector<char>*> vetores, std::string nomeArq);
+    //Enzo
+     vector<char> AuxDireto(char id_no);
+    bool EhConexo(char a);
+    //Enzo
 
     HASH<No *, bool> *Hash_n;
     void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
