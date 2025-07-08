@@ -8,12 +8,19 @@
 
 using namespace std;
 
-/*OBSERVACAO: A ordem do cabecalho no nosso projeto ficou: Direcao, Aresta , Vertice. Essa mudnaca ocorreu devido 
+/*OBSERVACAO: A ordem do cabecalho no nosso projeto ficou: Direcao, Aresta , Vertice. Essa mudança ocorreu devido 
 ao fato das novas instancias estarem considerando o segundo termo da cabecalho como aresta*/
+/*
+Grupo 15
 
+Alunos:
+Igor Correa Trifilio Campos
+Gustavo Duarte Fernandes de Jesus
+Enzo Araújo Pinheiro
+Gabriel Toledo Gonçalves Barreto
 
-
-
+Repositório: https://github.com/Rogire/t1-dcc059-2025-1
+*/
 
 // Função que retorna o índice do nó com identificador 'id' na lista de adjacência
 int Grafo::indice_no(char id) {
@@ -466,6 +473,7 @@ vector<char> Grafo::caminho_minimo_floyd_sem_print(char id_no_a, char id_no_b)
         cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos direcionados." << endl;
         return {};
     }
+    // Verifica se o grafo é ponderado nas arestas
     if (!in_ponderado_aresta)
     {
         cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos não ponderado nas arestas." << endl;
@@ -1043,23 +1051,6 @@ std::ofstream Grafo::vetorParaArquivo(const std::vector<char> &vetor, std::strin
 
     return arq;
 }
-int Grafo::excentricidade(char id_no_a)
-{
-    vector<char> caminho_minimo;
-    int maior{0};
-
-    for (No *n : this->lista_adj)
-    {
-        if (n->id != id_no_a)
-        {
-            caminho_minimo = this->caminho_minimo_floyd_sem_print(id_no_a, n->id);
-
-            if (caminho_minimo.size() > maior)
-                maior = caminho_minimo.size();
-        }
-    }
-    return maior - 1;
-}
 
 std::ofstream Grafo::h_paraArquivo(par<int, int> raio_diametro, par<std::vector<char>*, std::vector<char>*> vetores, std::string nomeArq)
 {
@@ -1083,6 +1074,46 @@ std::ofstream Grafo::h_paraArquivo(par<int, int> raio_diametro, par<std::vector<
 
     arq.close();
     return arq;
+}
+
+bool Grafo::temArestaNegativa()
+{
+    for (No *node : this->lista_adj)
+        for (Aresta *a : node->arestas)
+            if (a->peso < 0)
+                return true;
+
+    return false;
+}
+
+int Grafo::excentricidade(char id_no_a)
+{
+    vector<char> caminho_minimo;
+    int maior{0};
+
+    for (No *n : this->lista_adj)
+    {
+        if (n->id != id_no_a)
+        {
+            if (this->in_direcionado == 0 && this->in_ponderado_aresta == 1)
+                caminho_minimo = this->caminho_minimo_floyd_sem_print(id_no_a, n->id);
+            else if (!temArestaNegativa())
+                caminho_minimo = this->caminho_minimo_dijkstra(id_no_a, n->id);
+            else
+            {
+                std::cout << "Não é possível calcular a excentridade do grafo, pois como é direcionado e/ou não possui peso nas arestas não é possível usar o caminho mínimo de floyd e como possui arestas negativas, não é possível usar o algoritmo de dijkstra";
+                exit(-1);
+            }
+
+            if (caminho_minimo.size() > maior)
+                maior = caminho_minimo.size();
+        }
+    }
+
+    if(maior != 0)
+        return maior - 1;
+    else
+        return 1;
 }
 
 int Grafo::raio()

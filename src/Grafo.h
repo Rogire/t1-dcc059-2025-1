@@ -49,6 +49,7 @@ public:
     int indice_no(char id);
     void imprimir_grafo();
     int excentricidade(char id_no_a);
+    bool temArestaNegativa();
     std::ofstream grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq);
     std::ofstream grafoParaArquivo(const Grafo &grafo, std::string nomeArq);
     std::ofstream vetorParaArquivo(const std::vector<char>& vetor, std::string nomeArq);

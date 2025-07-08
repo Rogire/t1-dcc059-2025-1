@@ -1,6 +1,15 @@
 #include "Gerenciador.h"
 #include <fstream>
 
+/*
+Alunos:
+Igor Correa Trifilio Campos
+Gustavo Duarte Fernandes de Jesus
+Enzo Araújo Pinheiro
+Gabriel Toledo Gonçalves Barreto
+
+Repositório: https://github.com/Rogire/t1-dcc059-2025-1
+*/
 
 void Gerenciador::comandos(Grafo* grafo) {
     cout<<"Digite uma das opcoes abaixo e pressione enter:"<<endl<<endl;
