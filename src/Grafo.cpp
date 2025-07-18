@@ -1234,3 +1234,9 @@ bool Grafo::EhConexo(char id_no){// utiliza a função DiretoAux para retornar o
         return false;
     return true;
 }
+
+
+//===============================================================Trabalho - PARTE 2==========================================================================
+
+
+

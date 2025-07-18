@@ -58,9 +58,10 @@ public:
      vector<char> AuxDireto(char id_no);
     bool EhConexo(char a);
     //Enzo
-
     HASH<No *, bool> *Hash_n;
     void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
+
+    
 
     int ordem;
     bool in_direcionado;
