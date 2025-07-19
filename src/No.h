@@ -8,6 +8,7 @@
 
 using namespace std;
 class No {
+
 public:
     No(char id, int peso = 0);
     ~No();
@@ -16,8 +17,9 @@ public:
     int peso;
     bool marca; // usada pra indicar que o no ja foi analisado
     vector<Aresta*> arestas;
+//========================= Parte 2 =========================================
+    bool dominante = false;
+    bool dominado = false;
 };
-
-
 
 #endif //NO_H

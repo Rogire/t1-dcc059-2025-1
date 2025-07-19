@@ -22,7 +22,8 @@
 
 #include "Hash.h"
 #include "par.h"
-
+// ===================== Parte 2 ========================
+#include <algorithm>
 using namespace std;
 
 class Grafo {
@@ -50,18 +51,26 @@ public:
     void imprimir_grafo();
     int excentricidade(char id_no_a);
     bool temArestaNegativa();
+    
     std::ofstream grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq);
     std::ofstream grafoParaArquivo(const Grafo &grafo, std::string nomeArq);
+
     std::ofstream vetorParaArquivo(const std::vector<char>& vetor, std::string nomeArq);
     std::ofstream h_paraArquivo(par<int,int> raio_diametro,par<std::vector<char>*, std::vector<char>*> vetores, std::string nomeArq);
     //Enzo
      vector<char> AuxDireto(char id_no);
     bool EhConexo(char a);
-    //Enzo
+    
     HASH<No *, bool> *Hash_n;
     void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
 
-    
+    //===========================================PARTE 2===================================================================================
+
+    Grafo *CDS_guloso();
+    HASH<No *, int> *Hash_MOA;
+    std::ofstream grafoParaArquivo(const std::vector<No *> vertices, std::vector<par<std::string, int>> &listaArestas, std::string nomeArq);
+    void menorOrds_MOA();
+    par<bool,int>* adjDominante(No* node);
 
     int ordem;
     bool in_direcionado;

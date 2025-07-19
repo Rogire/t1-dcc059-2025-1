@@ -21,7 +21,7 @@ class HASH
 {
 public:
     HASH() {};
-    HASH(std::vector<K> &lista_adj)
+    HASH(std::vector<K> &lista_adj, bool unique = false)
     {
         if (lista_adj.empty())
         {
@@ -37,10 +37,20 @@ public:
 
         this->tam = maior + 1;
 
-        this->Hash = new par<K, V> *[this->tam];
+        if(unique)
+        {
+            this->Hash_unique = new V *[this->tam];
+            for (int i = 0; i < this->tam; i++)
+                this->Hash_unique[i] = nullptr;
+        }
+        else
+        {
+            this->Hash = new par<K, V> *[this->tam];
 
-        for (int i = 0; i < this->tam; i++)
-            this->Hash[i] = nullptr;
+            for (int i = 0; i < this->tam; i++)
+                this->Hash[i] = nullptr;
+        }
+
     };
 
     void InitHash(std::vector<K> &lista_adj, V valInicial)
@@ -69,10 +79,23 @@ public:
 
     ~HASH()
     {
-        for (int i{0}; i < tam; i++)
-            delete this->Hash[i];
+        if (this->Hash)
+        {
+            for (int i{0}; i < tam; i++)
+                if (this->Hash[i])
+                    delete this->Hash[i];
 
-        delete[] this->Hash;
+            delete[] this->Hash;
+        }
+        
+        if (this->Hash_unique)
+        {
+            for (int i{0}; i < tam; i++)
+                if (this->Hash_unique[i])
+                    delete this->Hash_unique[i];
+
+            delete[] this->Hash_unique;
+        }
     }
 
     par<K, V> *get(int id)
@@ -85,6 +108,8 @@ public:
 
 private:
     par<K, V> **Hash;
+    V **Hash_unique;
+
     int tam{};
 };
 
