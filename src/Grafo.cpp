@@ -1243,6 +1243,7 @@ bool Grafo::EhConexo(char id_no){
 // Menor conjunto dominante possível
 // Deve ser conexo
 // todo vértice do grafo está ou no conjunto ou é adjacente a pelo menos um vértice do conjunto
+//O(V² + 2VE)
 
 Grafo* Grafo::CDS_guloso()
 {
@@ -1261,6 +1262,27 @@ Grafo* Grafo::CDS_guloso()
         return Hash_MOA->get(a->id)->getValue() < Hash_MOA->get(b->id)->getValue();
     });
 
+    for (int i{0}; i < Candidatos.size(); i++)
+    {
+        No *node = Candidatos.at(i);
+
+        if (this->Hash_MOA->get(node->id)->getValue() == 1)
+        {
+            Candidatos.at(i)->dominante = true;
+            Dominantes.push_back(Candidatos.at(i));
+            nos_dominados++;
+
+            for (Aresta *a : Candidatos.at(0)->arestas)
+            {
+                this->Hash_MOA->get(a->id_no_alvo)->getKey()->dominado = true;
+                nos_dominados++;
+            }
+
+            Candidatos.erase(Candidatos.begin() + i);
+        }
+    }
+
+    /*
     Candidatos.at(0)->dominante = true;
     Dominantes.push_back(Candidatos.at(0));
     nos_dominados++;
@@ -1272,31 +1294,42 @@ Grafo* Grafo::CDS_guloso()
     }
 
     Candidatos.erase(Candidatos.begin());
-    par<bool, int> *info_vertice_atual;
+    */
 
+
+    par<bool, int> *info_vertice_atual;
+    
     //se a ordem do 1º vértice for igual ao nº de vértices-1, o CDS é apenas ele
     if(Dominantes.at(0)->arestas.size() != this->lista_adj.size()-1)
         while (nos_dominados <= total_nos)
         {
             No *prox{};
-            int adj_ND_at{INT_MIN}, i_prox{};
+            int adj_ND_at{INT_MIN},menor_MOA_at{INT_MAX}, i_prox{};
 
             //monta o vetor de candidatos
             for (int i{0}; i < Candidatos.size(); i++)
             {
                 No *node = Candidatos.at(i);
+                auto MOA_at = this->Hash_MOA->get(node->id)->getValue();
                 info_vertice_atual = adjDominante(node);
 
                 //se não é adjacente a dominante
-                if(!info_vertice_atual->getKey())
+                if(!info_vertice_atual->getKey() && nos_dominados > 0)
                     continue;
 
-                if (info_vertice_atual->getValue() > adj_ND_at)
+                if (MOA_at < menor_MOA_at)
+                {
+                    prox = node;
+                    i_prox = i;
+                    menor_MOA_at = MOA_at;
+                }
+                else if (info_vertice_atual->getValue() > adj_ND_at)
                 {
                     prox = node;
                     i_prox = i;
                     adj_ND_at = info_vertice_atual->getValue();
                 }
+ 
             }
 
             prox->dominante = true;
@@ -1421,9 +1454,11 @@ void Grafo::menorOrds_MOA()
 
         for (Aresta *a : node->arestas)
         {
-            if (this->Hash_MOA->get(a->id_no_alvo))
+            auto No_Aresta = this->Hash_MOA->get(a->id_no_alvo);
+
+            if (No_Aresta)
             {
-                int OrdNodeAt = this->Hash_MOA->get(a->id_no_alvo)->getKey()->arestas.size();
+                int OrdNodeAt = No_Aresta->getKey()->arestas.size();
 
                 if (OrdNodeAt < menor)
                     menor = OrdNodeAt;
