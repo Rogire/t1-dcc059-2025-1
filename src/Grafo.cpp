@@ -9,7 +9,7 @@
 using namespace std;
 
 /*OBSERVACAO: A ordem do cabecalho no nosso projeto ficou: Direcao, Aresta , Vertice. Essa mudança ocorreu devido 
-ao fato das novas instancias estarem considerando o segundo termo da cabecalho como aresta*/
+ao fato das novas instancias estarem considerando o segundo termo da cabPecalho como aresta*/
 /*
 Grupo 15
 
@@ -944,7 +944,7 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
         PROF(comeco->getKey(), &listaArestas);
     }
 
-    std::ofstream arq = this->grafoParaArquivo(listaArestas, "CaminhamentoProfundidade.txt");
+    std::ofstream arq = this->grafoParaArquivo("CaminhamentoProfundidade.txt");
 
     Grafo *ret = new Grafo();
     ret->montar_Grafo_por_arquivo("CaminhamentoProfundidade.txt");
@@ -956,9 +956,47 @@ Grafo *Grafo::arvore_caminhamento_profundidade(char id_no)
     return ret;
 };
 
-std::ofstream Grafo::grafoParaArquivo(std::vector<par<std::string, int>> &listaArestas, std::string nomeArq)
+std::ofstream Grafo::grafoParaArquivo(std::string nomeArq)
 {
     std::ofstream arq(nomeArq);
+    std::vector<par<std::string, int>> listaArestas;
+    for (No *c : this->lista_adj)
+    {
+        for (Aresta *a : c->arestas)
+        {
+            if (this->Hash_MOA->get(a->id_no_alvo)->getKey()->dominante == false)
+                continue;
+
+            std::string strAtual = std::string(1, c->id) + " " + std::string(1, a->id_no_alvo);
+            bool add{};
+
+            if (listaArestas.empty())
+                listaArestas.push_back(par(strAtual, a->peso));
+            else
+                for (par<std::string, int> p : listaArestas)
+                {
+                    add = true;
+
+                    if (p.getKey() == strAtual)
+                    {
+                        add = false;
+                        break;
+                    }
+
+                    // evita duplicatas (a b, e b a)
+                    if (!this->in_direcionado)
+                        if (p.getKey().size() == 3 && strAtual.size() == 3)
+                            if (strAtual[0] == p.getKey()[2] && strAtual[2] == p.getKey()[0])
+                            {
+                                add = false;
+                                break;
+                            }
+                }
+
+            if (add)
+                listaArestas.push_back(par(strAtual, a->peso));
+        }
+    }
 
     if (!arq.is_open())
     {
@@ -1251,9 +1289,9 @@ Grafo* Grafo::CDS_guloso()
     this->Hash_MOA->InitHash(this->lista_adj, 0);
 
     std::vector<par<std::string, int>> listaArestas;
-    std::vector<No*> Candidatos = this->lista_adj;
-    std::vector<No*> Dominantes;
+    std::vector<No*> Candidatos = this->lista_adj, Dominantes;
     int nos_dominados{0}, total_nos = this->lista_adj.size();
+    par<bool, int> *info_vertice_atual;
 
     menorOrds_MOA();
 
@@ -1262,7 +1300,7 @@ Grafo* Grafo::CDS_guloso()
         return Hash_MOA->get(a->id)->getValue() < Hash_MOA->get(b->id)->getValue();
     });
 
-    for (int i{0}; i < Candidatos.size(); i++)
+    /*for (int i{0}; i < Candidatos.size(); i++)
     {
         No *node = Candidatos.at(i);
 
@@ -1280,103 +1318,114 @@ Grafo* Grafo::CDS_guloso()
 
             Candidatos.erase(Candidatos.begin() + i);
         }
-    }
+    }*/
 
-    /*
-    Candidatos.at(0)->dominante = true;
-    Dominantes.push_back(Candidatos.at(0));
-    nos_dominados++;
-
-    for (Aresta *a : Candidatos.at(0)->arestas)
-    {
-        this->Hash_MOA->get(a->id_no_alvo)->getKey()->dominado = true;
-        nos_dominados++;
-    }
-
-    Candidatos.erase(Candidatos.begin());
-    */
-
-
-    par<bool, int> *info_vertice_atual;
     
     //se a ordem do 1º vértice for igual ao nº de vértices-1, o CDS é apenas ele
-    if(Dominantes.at(0)->arestas.size() != this->lista_adj.size()-1)
-        while (nos_dominados <= total_nos)
+    while (nos_dominados < total_nos)
+    {
+        No *prox{};
+        int adj_ND_at{INT_MIN}, menor_MOA_at{INT_MAX}, i_prox{};
+
+        //monta o vetor de candidatos
+        for (int i{0}; i < Candidatos.size(); i++)
         {
-            No *prox{};
-            int adj_ND_at{INT_MIN},menor_MOA_at{INT_MAX}, i_prox{};
+            No *node = Candidatos.at(i);
+            auto MOA_at = this->Hash_MOA->get(node->id)->getValue();
 
-            //monta o vetor de candidatos
-            for (int i{0}; i < Candidatos.size(); i++)
+            if (MOA_at == 1 || node->arestas.size() == this->lista_adj.size() - 1)
             {
-                No *node = Candidatos.at(i);
-                auto MOA_at = this->Hash_MOA->get(node->id)->getValue();
-                info_vertice_atual = adjDominante(node);
-
-                //se não é adjacente a dominante
-                if(!info_vertice_atual->getKey() && nos_dominados > 0)
-                    continue;
-
-                if (MOA_at < menor_MOA_at)
-                {
-                    prox = node;
-                    i_prox = i;
-                    menor_MOA_at = MOA_at;
-                }
-                else if (info_vertice_atual->getValue() > adj_ND_at)
-                {
-                    prox = node;
-                    i_prox = i;
-                    adj_ND_at = info_vertice_atual->getValue();
-                }
- 
+                prox = node;
+                i_prox = i;
+                menor_MOA_at = MOA_at;
+                break;
             }
 
-            prox->dominante = true;
+            info_vertice_atual = adjDominante(node);
 
-            if(!prox->dominado)
+            //se não é adjacente a dominante
+            if(!info_vertice_atual->getKey() && nos_dominados > 0)
+                continue;
+
+            if (MOA_at < menor_MOA_at)
             {
-                prox->dominado = true;
-                nos_dominados++;
+                prox = node;
+                i_prox = i;
+                menor_MOA_at = MOA_at;
             }
-
-            Dominantes.push_back(prox);
-
-            for (Aresta *a : prox->arestas)
+            
+            if(info_vertice_atual->getValue() > adj_ND_at)
             {
-                No *vizinho = this->Hash_MOA->get(a->id_no_alvo)->getKey();
-
-                if (!vizinho->dominado)
-                {
-                    vizinho->dominado = true;
-                    nos_dominados++;
-                }
+                prox = node;
+                i_prox = i;
+                adj_ND_at = info_vertice_atual->getValue();
             }
-
-            Candidatos.erase(Candidatos.begin() + i_prox);
         }
 
+        prox->dominante = true;
+
+        if(!prox->dominado)
+        {
+            prox->dominado = true;
+            nos_dominados++;
+        }
+
+        Dominantes.push_back(prox);
+
+        for (Aresta *a : prox->arestas)
+        {
+            No *vizinho = this->Hash_MOA->get(a->id_no_alvo)->getKey();
+
+            if (!vizinho->dominado)
+            {
+                vizinho->dominado = true;
+                nos_dominados++;
+            }
+        }
+
+        Candidatos.erase(Candidatos.begin() + i_prox);
+    }
+    
     std::cout << "Vértices Dominantes:\n";
-
     for (No* c : Dominantes)
-    {
         std::cout << c->id << " ";
+    std::cout << "\n";
 
-        for(Aresta* a : c->arestas)
+    Grafo *grafo = this->grafoParaArquivo(Dominantes, "MCDC.txt");
+
+    this->Hash_MOA->~HASH();
+    return grafo;
+}
+
+
+Grafo* Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::string nomeArq)
+{
+    std::ofstream arq(nomeArq);
+    std::vector<par<std::string, int>> listaArestas;
+
+    if (!arq.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return nullptr;
+    }
+
+    for (No *c : vertices)
+    {
+        for (Aresta *a : c->arestas)
         {
             if (this->Hash_MOA->get(a->id_no_alvo)->getKey()->dominante == false)
                 continue;
-            
+
             std::string strAtual = std::string(1, c->id) + " " + std::string(1, a->id_no_alvo);
             bool add{};
-            
-            if(listaArestas.empty())
-                listaArestas.push_back(par(strAtual,a->peso));
+
+            if (listaArestas.empty())
+                listaArestas.push_back(par(strAtual, a->peso));
             else
                 for (par<std::string, int> p : listaArestas)
                 {
                     add = true;
-                    
+
                     if (p.getKey() == strAtual)
                     {
                         add = false;
@@ -1392,29 +1441,10 @@ Grafo* Grafo::CDS_guloso()
                                 break;
                             }
                 }
-            
-            if(add)
-                listaArestas.push_back(par(strAtual,a->peso));
+
+            if (add)
+                listaArestas.push_back(par(strAtual, a->peso));
         }
-    }
-
-    this->grafoParaArquivo(Dominantes, listaArestas, "MCDC.txt");
-    Grafo *grafo = new Grafo();
-    grafo->montar_Grafo_por_arquivo("MCDC.txt");
-
-    system("rm MCDC.txt");
-    this->Hash_MOA->~HASH();
-    
-    return grafo;
-}
-std::ofstream Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::vector<par<std::string, int>> &listaArestas, std::string nomeArq)
-{
-    std::ofstream arq(nomeArq);
-
-    if (!arq.is_open())
-    {
-        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
-        return std::ofstream();
     }
 
     // cabeçalho do txt
@@ -1441,7 +1471,10 @@ std::ofstream Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::vec
 
     arq.close();
 
-    return arq;
+    Grafo *ret = new Grafo();
+    ret->montar_Grafo_por_arquivo(nomeArq);
+    system(("rm " + nomeArq).c_str());
+    return ret;
 }
 
 void Grafo::menorOrds_MOA()
