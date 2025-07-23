@@ -1300,27 +1300,6 @@ Grafo* Grafo::CDS_guloso()
         return Hash_MOA->get(a->id)->getValue() < Hash_MOA->get(b->id)->getValue();
     });
 
-    /*for (int i{0}; i < Candidatos.size(); i++)
-    {
-        No *node = Candidatos.at(i);
-
-        if (this->Hash_MOA->get(node->id)->getValue() == 1)
-        {
-            Candidatos.at(i)->dominante = true;
-            Dominantes.push_back(Candidatos.at(i));
-            nos_dominados++;
-
-            for (Aresta *a : Candidatos.at(0)->arestas)
-            {
-                this->Hash_MOA->get(a->id_no_alvo)->getKey()->dominado = true;
-                nos_dominados++;
-            }
-
-            Candidatos.erase(Candidatos.begin() + i);
-        }
-    }*/
-
-    
     //se a ordem do 1º vértice for igual ao nº de vértices-1, o CDS é apenas ele
     while (nos_dominados < total_nos)
     {
@@ -1392,7 +1371,6 @@ Grafo* Grafo::CDS_guloso()
     std::cout << "\n";
 
     Grafo *grafo = this->grafoParaArquivo(Dominantes, "MCDC.txt");
-
     this->Hash_MOA->~HASH();
     return grafo;
 }
