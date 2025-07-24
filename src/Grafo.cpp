@@ -1283,6 +1283,7 @@ bool Grafo::EhConexo(char id_no){
 // todo vértice do grafo está ou no conjunto ou é adjacente a pelo menos um vértice do conjunto
 //O(V² + 2VE)
 
+//TODO: remover hash moa
 Grafo* Grafo::CDS_guloso()
 {
     this->Hash_MOA = new HASH<No*, int>(this->lista_adj);
@@ -1292,52 +1293,42 @@ Grafo* Grafo::CDS_guloso()
     std::vector<No*> Candidatos = this->lista_adj, Dominantes;
     int nos_dominados{0}, total_nos = this->lista_adj.size();
     par<bool, int> *info_vertice_atual;
-
-    menorOrds_MOA();
-
-    std::sort(Candidatos.begin(), Candidatos.end(), [this](No* a, No* b)
-    {
-        return Hash_MOA->get(a->id)->getValue() < Hash_MOA->get(b->id)->getValue();
-    });
+    int i{0}, c{0}, it_aresta{0}, totA{0};
 
     //se a ordem do 1º vértice for igual ao nº de vértices-1, o CDS é apenas ele
     while (nos_dominados < total_nos)
     {
+        std::cout << "While Iterou " << i << " vezes\n";
+        i++;
+        it_aresta = 0;
+
         No *prox{};
-        int adj_ND_at{INT_MIN}, menor_MOA_at{INT_MAX}, i_prox{};
+        int adj_ND_at{INT_MIN}, i_prox{};
 
         //monta o vetor de candidatos
+
         for (int i{0}; i < Candidatos.size(); i++)
         {
             No *node = Candidatos.at(i);
-            auto MOA_at = this->Hash_MOA->get(node->id)->getValue();
-
-            if (MOA_at == 1 || node->arestas.size() == this->lista_adj.size() - 1)
-            {
-                prox = node;
-                i_prox = i;
-                menor_MOA_at = MOA_at;
-                break;
-            }
-
             info_vertice_atual = adjDominante(node);
 
-            //se não é adjacente a dominante
-            if(!info_vertice_atual->getKey() && nos_dominados > 0)
-                continue;
-
-            if (MOA_at < menor_MOA_at)
+            if (nos_dominados == 0)
             {
-                prox = node;
-                i_prox = i;
-                menor_MOA_at = MOA_at;
+                if (info_vertice_atual->getValue() > adj_ND_at)
+                {
+                    prox = node;
+                    i_prox = i;
+                    adj_ND_at = info_vertice_atual->getValue();
+                }
             }
-            
-            if(info_vertice_atual->getValue() > adj_ND_at)
+            else if (info_vertice_atual->getKey())
             {
-                prox = node;
-                i_prox = i;
-                adj_ND_at = info_vertice_atual->getValue();
+                if (info_vertice_atual->getValue() > adj_ND_at)
+                {
+                    prox = node;
+                    i_prox = i;
+                    adj_ND_at = info_vertice_atual->getValue();
+                }
             }
         }
 
@@ -1353,6 +1344,8 @@ Grafo* Grafo::CDS_guloso()
 
         for (Aresta *a : prox->arestas)
         {
+            std::cout << "for arestas Iterou " << it_aresta << " vezes\n";
+            it_aresta++;
             No *vizinho = this->Hash_MOA->get(a->id_no_alvo)->getKey();
 
             if (!vizinho->dominado)
@@ -1363,8 +1356,12 @@ Grafo* Grafo::CDS_guloso()
         }
 
         Candidatos.erase(Candidatos.begin() + i_prox);
+        totA += it_aresta;
     }
-    
+
+    std::cout << "Pra pegar os vértices dominantes iterou " << i + c + totA << " vezes\n";
+
+
     std::cout << "Vértices Dominantes:\n";
     for (No* c : Dominantes)
         std::cout << c->id << " ";
@@ -1455,6 +1452,7 @@ Grafo* Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::string nom
     return ret;
 }
 
+/*
 void Grafo::menorOrds_MOA()
 {
     int menor{};
@@ -1479,7 +1477,7 @@ void Grafo::menorOrds_MOA()
         if (this->Hash_MOA->get(node->id))
             this->Hash_MOA->get(node->id)->setValue(menor);
     }
-}
+}*/
 
 par<bool,int>* Grafo::adjDominante(No* node)
 {
@@ -1489,6 +1487,7 @@ par<bool,int>* Grafo::adjDominante(No* node)
     for (Aresta *a : node->arestas)
     {
         No *vizinho = this->Hash_MOA->get(a->id_no_alvo)->getKey();
+
         if (vizinho->dominante)
             adj_Dom = true;
         else if (!vizinho->dominado)
