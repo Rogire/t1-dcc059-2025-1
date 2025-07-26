@@ -964,9 +964,6 @@ std::ofstream Grafo::grafoParaArquivo(std::string nomeArq)
     {
         for (Aresta *a : c->arestas)
         {
-            if (this->Hash_MOA->get(a->id_no_alvo)->getKey()->dominante == false)
-                continue;
-
             std::string strAtual = std::string(1, c->id) + " " + std::string(1, a->id_no_alvo);
             bool add{};
 
@@ -1283,15 +1280,15 @@ bool Grafo::EhConexo(char id_no){
 // todo vértice do grafo está ou no conjunto ou é adjacente a pelo menos um vértice do conjunto
 //O(V² + 2VE)
 
-//TODO: remover hash moa
 Grafo* Grafo::CDS_guloso()
 {
-    this->Hash_MOA = new HASH<No*, int>(this->lista_adj);
-    this->Hash_MOA->InitHash(this->lista_adj, 0);
+    this->Hash_nodes = new HASH_unica(this->lista_adj);
+    Hash_nodes->InitHash(this->lista_adj);
 
-    std::vector<par<std::string, int>> listaArestas;
+    std::vector<std::string> listaArestas;
     std::vector<No*> Candidatos = this->lista_adj, Dominantes;
     int nos_dominados{0}, total_nos = this->lista_adj.size();
+
     par<bool, int> *info_vertice_atual;
     int i{0}, c{0}, it_aresta{0}, totA{0};
 
@@ -1309,6 +1306,8 @@ Grafo* Grafo::CDS_guloso()
 
         for (int i{0}; i < Candidatos.size(); i++)
         {
+            std::cout << "For iterou " << c << "vezes\n";
+            c++;
             No *node = Candidatos.at(i);
             info_vertice_atual = adjDominante(node);
 
@@ -1346,7 +1345,11 @@ Grafo* Grafo::CDS_guloso()
         {
             std::cout << "for arestas Iterou " << it_aresta << " vezes\n";
             it_aresta++;
-            No *vizinho = this->Hash_MOA->get(a->id_no_alvo)->getKey();
+
+            No *vizinho = Hash_nodes->get(a->id_no_alvo);
+
+            if(vizinho->dominante)
+                listaArestas.push_back(std::string(1, vizinho->id) + " " + std::string(1, prox->id));
 
             if (!vizinho->dominado)
             {
@@ -1367,11 +1370,25 @@ Grafo* Grafo::CDS_guloso()
         std::cout << c->id << " ";
     std::cout << "\n";
 
-    Grafo *grafo = this->grafoParaArquivo(Dominantes, "MCDC.txt");
-    this->Hash_MOA->~HASH();
-    return grafo;
-}
+    std::ofstream arq("MCDC.txt");
+    // cabeçalho do txt
+    arq << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
+    arq << Dominantes.size() << std::endl;
 
+    for (No *node : Dominantes)
+        arq << node->id << "\n";
+    
+    for(std::string s : listaArestas)
+        arq << s << "\n";
+
+    arq.close();
+
+    Grafo *ret = new Grafo();
+    ret->montar_Grafo_por_arquivo("MCDC.txt");
+    system("rm MCDC.txt");
+
+    return ret;
+}
 
 Grafo* Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::string nomeArq)
 {
@@ -1388,7 +1405,7 @@ Grafo* Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::string nom
     {
         for (Aresta *a : c->arestas)
         {
-            if (this->Hash_MOA->get(a->id_no_alvo)->getKey()->dominante == false)
+            if (this->Hash_nodes->get(a->id_no_alvo)->dominante == false)
                 continue;
 
             std::string strAtual = std::string(1, c->id) + " " + std::string(1, a->id_no_alvo);
@@ -1448,36 +1465,9 @@ Grafo* Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::string nom
 
     Grafo *ret = new Grafo();
     ret->montar_Grafo_por_arquivo(nomeArq);
-    system(("rm " + nomeArq).c_str());
+    //system(("rm " + nomeArq).c_str());
     return ret;
 }
-
-/*
-void Grafo::menorOrds_MOA()
-{
-    int menor{};
-
-    for(No* node : this->lista_adj)
-    {
-        menor = INT_MAX;
-
-        for (Aresta *a : node->arestas)
-        {
-            auto No_Aresta = this->Hash_MOA->get(a->id_no_alvo);
-
-            if (No_Aresta)
-            {
-                int OrdNodeAt = No_Aresta->getKey()->arestas.size();
-
-                if (OrdNodeAt < menor)
-                    menor = OrdNodeAt;
-            }
-        }
-
-        if (this->Hash_MOA->get(node->id))
-            this->Hash_MOA->get(node->id)->setValue(menor);
-    }
-}*/
 
 par<bool,int>* Grafo::adjDominante(No* node)
 {
@@ -1486,7 +1476,7 @@ par<bool,int>* Grafo::adjDominante(No* node)
 
     for (Aresta *a : node->arestas)
     {
-        No *vizinho = this->Hash_MOA->get(a->id_no_alvo)->getKey();
+        No *vizinho = this->Hash_nodes->get(a->id_no_alvo);
 
         if (vizinho->dominante)
             adj_Dom = true;

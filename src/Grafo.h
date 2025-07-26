@@ -21,6 +21,7 @@
 #include <unordered_set>
 
 #include "Hash.h"
+#include "Hash_unica.h"
 #include "par.h"
 // ===================== Parte 2 ========================
 #include <algorithm>
@@ -66,10 +67,9 @@ public:
 
     //===========================================PARTE 2===================================================================================
 
+    HASH_unica* Hash_nodes;
     Grafo *CDS_guloso();
-    HASH<No *, int> *Hash_MOA;
     Grafo* grafoParaArquivo(const std::vector<No *> vertices, std::string nomeArq);
-    void menorOrds_MOA();
     par<bool,int>* adjDominante(No* node);
 
     int ordem;

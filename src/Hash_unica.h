@@ -1,5 +1,5 @@
-#ifndef HASH_H
-#define HASH_H
+#ifndef HASH_UNICA_H
+#define HASH_UNICA_H
 
 #include <iostream>
 #include <vector>
@@ -16,12 +16,14 @@ Gabriel Toledo Gonçalves Barreto
 Repositório: https://github.com/Rogire/t1-dcc059-2025-1
 */
 
-template <typename K, typename V>
-class HASH
+
+
+class HASH_unica
 {
 public:
-    HASH() {};
-    HASH(const std::vector<K> &lista_adj, bool unique = false)
+    HASH_unica() {};
+
+    HASH_unica(const std::vector<No*> &lista_adj)
     {
         if (lista_adj.empty())
         {
@@ -36,60 +38,57 @@ public:
                 maior = No->id;
 
         this->tam = maior + 1;
-
-        this->Hash = new par<K, V> *[this->tam];
+        this->Hash_unique = new No *[this->tam];
 
         for (int i = 0; i < this->tam; i++)
-            this->Hash[i] = nullptr;
+            this->Hash_unique[i] = nullptr;
     };
 
-    void InitHash(std::vector<K> &lista_adj, V valInicial)
+    void InitHash(std::vector<No*> &lista_adj)
     {
         for (auto node : lista_adj)
         {
             if (node->id >= 0 && node->id < this->tam)
             {
-                if (this->Hash[node->id] != nullptr)
-                    delete this->Hash[node->id];
-                
-                this->Hash[node->id] = new par<K, V>(node, valInicial);
+                if(this->Hash_unique[node->id] != nullptr)
+                    delete this->Hash_unique[node->id];
+
+                this->Hash_unique[node->id] = node;
             }
         }
     }
 
-    void printHash(std::vector<K> &lista_adj)
+    void printHash(std::vector<No*> &lista_adj)
     {
         std::cout << " HASH MONTADA: \n";
 
         for (auto node : lista_adj)
         {
-            std::cout << this->Hash[node->id]->getKey()->id << " \n";
+            std::cout << this->Hash_unique[node->id]->id << " \n";
         }
     }
 
-    ~HASH()
+    ~HASH_unica()
     {
-        if (this->Hash)
-        {
-            for (int i{0}; i < tam; i++)
-                if (this->Hash[i])
-                    delete this->Hash[i];
+        for (int i{0}; i < tam; i++)
+            if (this->Hash_unique[i])
+                delete this->Hash_unique[i];
 
-            delete[] this->Hash;
-        }
+        delete[] this->Hash_unique;
     }
 
-    par<K, V> *get(int id)
+    No* get(int id)
     {
         if (id >= 0 && id < tam)
-            return this->Hash[id];
+            return this->Hash_unique[id];
 
         return nullptr;
     }
 
 private:
-    par<K, V> **Hash;
+    No **Hash_unique;
+
     int tam{};
 };
 
-#endif // HASH_H
+#endif // HASH_UNICA_H
