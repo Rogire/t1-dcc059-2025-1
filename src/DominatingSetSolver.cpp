@@ -1,7 +1,7 @@
 #include "DominatingSetSolver.h"
 #include <queue>
-#include <algorithm>
-#include <iostream>
+#include <set>
+#include <vector>
 
 DominatingSetSolver::DominatingSetSolver(Grafo& grafo) : grafo(grafo) {}
 
@@ -49,19 +49,47 @@ std::set<char> DominatingSetSolver::guloso() {
     std::set<char> dominantes;
     std::set<char> naoDominados;
 
-    for (No* no : grafo.lista_adj) {
+    // Inicializa conjunto de vértices não dominados
+    for (No* no : grafo.lista_adj)
         naoDominados.insert(no->id);
+
+    // Começa com nó que domina mais (ele + vizinhos)
+    char primeiro = '\0';
+    int maxCobertura = -1;
+    for (No* no : grafo.lista_adj) {
+        int cobertura = 1 + (int)no->getAdjacentes().size();
+        if (cobertura > maxCobertura) {
+            maxCobertura = cobertura;
+            primeiro = no->id;
+        }
     }
 
+    dominantes.insert(primeiro);
+    naoDominados.erase(primeiro);
+    for (char viz : obterVizinhos(primeiro))
+        naoDominados.erase(viz);
+
+    // Loop principal
     while (!naoDominados.empty()) {
         char melhorNo = '\0';
         int melhorCobranca = -1;
 
+        // Busca nó adjacente ao conjunto dominante que maximize cobertura
         for (No* no : grafo.lista_adj) {
             char id = no->id;
             if (dominantes.count(id)) continue;
 
-            int cobranca = naoDominados.count(id);
+            bool adjacenteDominantes = false;
+            for (char viz : no->getAdjacentes()) {
+                if (dominantes.count(viz)) {
+                    adjacenteDominantes = true;
+                    break;
+                }
+            }
+            if (!adjacenteDominantes) continue;
+
+            int cobranca = 0;
+            if (naoDominados.count(id)) cobranca++;
             for (char viz : no->getAdjacentes()) {
                 if (naoDominados.count(viz)) cobranca++;
             }
@@ -72,28 +100,23 @@ std::set<char> DominatingSetSolver::guloso() {
             }
         }
 
+        // Se não achar nó adjacente, pega qualquer nó (para não travar)
+        if (melhorNo == '\0') {
+            for (No* no : grafo.lista_adj) {
+                char id = no->id;
+                if (!dominantes.count(id)) {
+                    melhorNo = id;
+                    break;
+                }
+            }
+        }
+
         if (melhorNo == '\0') break;
 
         dominantes.insert(melhorNo);
         naoDominados.erase(melhorNo);
-        for (char viz : obterVizinhos(melhorNo)) {
+        for (char viz : obterVizinhos(melhorNo))
             naoDominados.erase(viz);
-        }
-
-        if (!subgrafoEhConexo(dominantes)) {
-            for (No* no : grafo.lista_adj) {
-                char id = no->id;
-                if (dominantes.count(id)) continue;
-
-                for (char viz : no->getAdjacentes()) {
-                    if (dominantes.count(viz)) {
-                        dominantes.insert(id);
-                        goto fim_conexao;
-                    }
-                }
-            }
-        fim_conexao:;
-        }
     }
 
     return dominantes;
