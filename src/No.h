@@ -5,8 +5,8 @@
 #include <vector>
 #include "Aresta.h"
 
-
 using namespace std;
+
 class No {
 public:
     No(char id, int peso = 0);
@@ -14,10 +14,10 @@ public:
 
     char id;
     int peso;
-    bool marca; // usada pra indicar que o no ja foi analisado
+    bool marca;
     vector<Aresta*> arestas;
+
+    std::vector<char> getAdjacentes() const; // ✅ NOVO
 };
-
-
 
 #endif //NO_H
