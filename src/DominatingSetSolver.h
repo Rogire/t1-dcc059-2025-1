@@ -11,6 +11,10 @@ public:
     DominatingSetSolver(Grafo& grafo);
 
     std::set<char> guloso(); // algoritmo guloso
+    std::set<char> gulosoRandomizado(double alpha);
+    void gulosoRandomizadoReativo(int iteracoes, const std::vector<double>& alphas, int bloco = 50);
+    std::set<char>corrigirConectividade(std::set<char> dominantes);
+
 
 private:
     Grafo& grafo;
