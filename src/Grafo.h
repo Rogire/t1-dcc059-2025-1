@@ -67,11 +67,6 @@ public:
 
     //===========================================PARTE 2===================================================================================
 
-    HASH_unica* Hash_nodes;
-    Grafo *CDS_guloso();
-    Grafo* grafoParaArquivo(const std::vector<No *> vertices, std::string nomeArq);
-    par<bool,int>* adjDominante(No* node);
-
     int ordem;
     bool in_direcionado;
     bool in_ponderado_aresta;

@@ -16,8 +16,12 @@ int main(int argc, char *argv[])
     Grafo* grafo = new Grafo();
     grafo->montar_Grafo_por_arquivo(argv[1]);
 
-    grafo->CDS_guloso();
+    //grafo->CDS_guloso();
 
     //Gerenciador::comandos(grafo);
+
+    CDS_guloso cds;
+    cds.CDS(grafo);
+
     return 0;
 }
