@@ -1,5 +1,8 @@
 #include <iostream>
+#include <chrono>
+#include <set>
 #include "Gerenciador.h"
+
 /*
 Alunos:
 Igor Correa Trifilio Campos
@@ -20,8 +23,24 @@ int main(int argc, char *argv[])
 
     //Gerenciador::comandos(grafo);
 
-    CDS_guloso cds;
-    cds.CDS(grafo);
+    CDS_guloso solver;
+
+    // =============================
+    // 1. Guloso Puro
+    // =============================
+
+    cout << "\n=== Guloso Puro ===\n";
+    auto ini1 = std::chrono::high_resolution_clock::now();
+    Grafo* resG = solver.CDS(grafo);
+
+    auto fim1 = std::chrono::high_resolution_clock::now();
+    double tempo1 = std::chrono::duration<double>(fim1 - ini1).count();
+
+    cout << "Conjunto Dominante Conexo (Guloso): { ";
+    for (No* c : resG->lista_adj)
+        cout << c->id << " ";
+    cout << "}\nTamanho: " << resG->lista_adj.size()
+         << " | Tempo (s): " << tempo1 << endl;
 
     return 0;
 }

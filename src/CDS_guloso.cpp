@@ -20,8 +20,8 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
 
     while (nos_dominados < total_nos)
     {
-        std::cout << "While Iterou " << i << " vezes\n";
-        i++;
+        //std::cout << "While Iterou " << i << " vezes\n";
+        //i++;
         it_aresta = 0;
 
         No *prox{};
@@ -30,12 +30,12 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
         // monta o vetor de candidatos
         for (int i{0}; i < Candidatos.size(); i++)
         {
-            std::cout << "For iterou " << c << "vezes\n";
-            c++;
+            //std::cout << "For iterou " << c << "vezes\n";
+            //c++;
             No *node = Candidatos.at(i);
             info_vertice_atual = adjDominante(node);
 
-            std::cout << "AdjDominante iterou: " << node->arestas.size() << " vezes\n";
+            //std::cout << "AdjDominante iterou: " << node->arestas.size() << " vezes\n";
             it_aresta += node->arestas.size();
 
             if (info_vertice_atual->getKey() || nos_dominados == 0)
@@ -61,8 +61,8 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
 
         for (Aresta *a : prox->arestas)
         {
-            std::cout << "for arestas Iterou " << it_aresta << " vezes\n";
-            it_aresta++;
+            //std::cout << "for arestas Iterou " << it_aresta << " vezes\n";
+            //it_aresta++;
 
             No *vizinho = Hash_nodes->get(a->id_no_alvo);
 
@@ -80,7 +80,7 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
         totA += it_aresta;
     }
 
-    std::cout << "Pra pegar os vértices dominantes iterou " << i + c + totA << " vezes\n";
+    //std::cout << "Pra pegar os vértices dominantes iterou " << i + c + totA << " vezes\n";
 
     std::cout << "Vértices Dominantes:\n";
     for (No *c : Dominantes)
