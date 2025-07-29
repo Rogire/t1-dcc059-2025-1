@@ -4,9 +4,9 @@
 // Menor conjunto dominante possível
 // Deve ser conexo
 // todo vértice do grafo está ou no conjunto ou é adjacente a pelo menos um vértice do conjunto
-// O(V² + 2VE)
+// O(V² + VE)
 
-Grafo* CDS_guloso::CDS(Grafo* grafo)
+vector<No*> CDS_guloso::CDS(Grafo* grafo)
 {
     this->Hash_nodes = new HASH_unica(grafo->lista_adj);
     Hash_nodes->InitHash(grafo->lista_adj);
@@ -21,7 +21,7 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
     while (nos_dominados < total_nos)
     {
         //std::cout << "While Iterou " << i << " vezes\n";
-        //i++;
+        i++;
         it_aresta = 0;
 
         No *prox{};
@@ -31,12 +31,17 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
         for (int i{0}; i < Candidatos.size(); i++)
         {
             //std::cout << "For iterou " << c << "vezes\n";
-            //c++;
+            c++;
             No *node = Candidatos.at(i);
             info_vertice_atual = adjDominante(node);
-
-            //std::cout << "AdjDominante iterou: " << node->arestas.size() << " vezes\n";
+            // std::cout << "AdjDominante iterou: " << node->arestas.size() << " vezes\n";
             it_aresta += node->arestas.size();
+
+            if(info_vertice_atual->getValue() == 0)
+            {
+                Candidatos.erase(Candidatos.begin() + i);
+                continue;
+            }
 
             if (info_vertice_atual->getKey() || nos_dominados == 0)
             {
@@ -62,7 +67,7 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
         for (Aresta *a : prox->arestas)
         {
             //std::cout << "for arestas Iterou " << it_aresta << " vezes\n";
-            //it_aresta++;
+            it_aresta++;
 
             No *vizinho = Hash_nodes->get(a->id_no_alvo);
 
@@ -80,31 +85,9 @@ Grafo* CDS_guloso::CDS(Grafo* grafo)
         totA += it_aresta;
     }
 
-    //std::cout << "Pra pegar os vértices dominantes iterou " << i + c + totA << " vezes\n";
+    std::cout << "Pra pegar os vértices dominantes iterou " << i + c + totA << " vezes\n";
 
-    std::cout << "Vértices Dominantes:\n";
-    for (No *c : Dominantes)
-        std::cout << c->id << " ";
-    std::cout << "\n";
-
-    std::ofstream arq("MCDC.txt");
-    // cabeçalho do txt
-    arq << grafo->in_direcionado << " " << grafo->in_ponderado_aresta << " " << grafo->in_ponderado_vertice << std::endl;
-    arq << Dominantes.size() << std::endl;
-
-    for (No *node : Dominantes)
-        arq << node->id << "\n";
-
-    for (std::string s : listaArestas)
-        arq << s << "\n";
-
-    arq.close();
-
-    Grafo *ret = new Grafo();
-    ret->montar_Grafo_por_arquivo("MCDC.txt");
-    system("rm MCDC.txt");
-
-    return ret;
+    return Dominantes;
 }
 
 par<bool, int>* CDS_guloso::adjDominante(No *node)

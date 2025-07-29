@@ -1271,3 +1271,88 @@ bool Grafo::EhConexo(char id_no){
 
     return true;
 }
+
+//============================================ Parte 2 ========================================================
+
+Grafo* Grafo::grafoParaArquivo(const std::vector<No *> vertices, std::string nomeArq)
+{
+    std::ofstream arq(nomeArq);
+    std::vector<par<std::string, int>> listaArestas;
+
+    HASH_unica* Hash_nodes = new HASH_unica(this->lista_adj);
+    Hash_nodes->InitHash(this->lista_adj);
+
+    if (!arq.is_open())
+    {
+        std::cerr << "Erro ao abrir o arquivo para escrita!" << std::endl;
+        return nullptr;
+    }
+
+    for (No *c : vertices)
+    {
+        for (Aresta *a : c->arestas)
+        {
+            if (Hash_nodes->get(a->id_no_alvo)->dominante == false)
+                continue;
+
+            std::string strAtual = std::string(1, c->id) + " " + std::string(1, a->id_no_alvo);
+            bool add{};
+
+            if (listaArestas.empty())
+                listaArestas.push_back(par(strAtual, a->peso));
+            else
+                for (par<std::string, int> p : listaArestas)
+                {
+                    add = true;
+
+                    if (p.getKey() == strAtual)
+                    {
+                        add = false;
+                        break;
+                    }
+
+                    // evita duplicatas (a b, e b a)
+                    if (!this->in_direcionado)
+                        if (p.getKey().size() == 3 && strAtual.size() == 3)
+                            if (strAtual[0] == p.getKey()[2] && strAtual[2] == p.getKey()[0])
+                            {
+                                add = false;
+                                break;
+                            }
+                }
+
+            if (add)
+                listaArestas.push_back(par(strAtual, a->peso));
+        }
+    }
+
+    // cabeçalho do txt
+    arq << this->in_direcionado << " " << this->in_ponderado_aresta << " " << this->in_ponderado_vertice << std::endl;
+    arq << vertices.size() << std::endl;
+
+    for (No *node : vertices)
+    {
+        arq << node->id;
+
+        if (node->peso != 0)
+            arq << " " << node->peso;
+
+        arq << "\n";
+    }
+
+    // arestas do vértice
+    if (this->in_ponderado_aresta)
+        for (auto t : listaArestas)
+            arq << t.getKey() << " " << t.getValue() << "\n";
+    else
+        for (auto t : listaArestas)
+            arq << t.getKey() << "\n";
+
+    arq.close();
+
+    Grafo *ret = new Grafo();
+    ret->montar_Grafo_por_arquivo(nomeArq);
+    system(("rm " + nomeArq).c_str());
+
+    return ret;
+}

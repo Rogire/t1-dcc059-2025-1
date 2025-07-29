@@ -22,7 +22,7 @@ class CDS_guloso
         CDS_guloso() {};
         ~CDS_guloso() {};
 
-        Grafo *CDS(Grafo* grafo);
+        std::vector<No*>CDS(Grafo* grafo);
     private:
         par<bool, int> *adjDominante(No *node);
         HASH_unica *Hash_nodes;

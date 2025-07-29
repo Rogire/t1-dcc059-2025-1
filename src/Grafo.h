@@ -66,6 +66,7 @@ public:
     void PROF(No *NoAt, std::vector<par<std::string, int>> *listaAdjRet);
 
     //===========================================PARTE 2===================================================================================
+    Grafo *grafoParaArquivo(const std::vector<No *> vertices, std::string nomeArq);
 
     int ordem;
     bool in_direcionado;

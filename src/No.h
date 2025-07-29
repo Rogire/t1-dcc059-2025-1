@@ -20,6 +20,9 @@ public:
 //========================= Parte 2 =========================================
     bool dominante = false;
     bool dominado = false;
+    
+    bool adj_Dominante = false;
+    int adj_ND = -1;
 };
 
 #endif //NO_H

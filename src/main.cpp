@@ -31,15 +31,15 @@ int main(int argc, char *argv[])
 
     cout << "\n=== Guloso Puro ===\n";
     auto ini1 = std::chrono::high_resolution_clock::now();
-    Grafo* resG = solver.CDS(grafo);
+    vector<No*> resG = solver.CDS(grafo);
 
     auto fim1 = std::chrono::high_resolution_clock::now();
     double tempo1 = std::chrono::duration<double>(fim1 - ini1).count();
 
     cout << "Conjunto Dominante Conexo (Guloso): { ";
-    for (No* c : resG->lista_adj)
+    for (No* c : resG)
         cout << c->id << " ";
-    cout << "}\nTamanho: " << resG->lista_adj.size()
+    cout << "}\nTamanho: " << resG.size()
          << " | Tempo (s): " << tempo1 << endl;
 
     return 0;
