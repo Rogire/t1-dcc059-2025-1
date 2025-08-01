@@ -55,7 +55,8 @@
         "format": "cpp",
         "iomanip": "cpp",
         "span": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "set": "cpp"
     },
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#1f6fd0",

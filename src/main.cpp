@@ -31,8 +31,7 @@ int main(int argc, char *argv[])
 
     cout << "\n=== Guloso Puro ===\n";
     auto ini1 = std::chrono::high_resolution_clock::now();
-    vector<No*> resG = solver.CDS(grafo);
-
+    vector<No*> resG = solver.CDS_teste(grafo);
     auto fim1 = std::chrono::high_resolution_clock::now();
     double tempo1 = std::chrono::duration<double>(fim1 - ini1).count();
 

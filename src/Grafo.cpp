@@ -152,18 +152,26 @@ void Grafo::montar_Grafo_por_arquivo(const string& nome_arquivo) {
             Aresta* final = new Aresta(v2, peso);
             lista_adj[idx_v1]->arestas.push_back(final);
 
+            lista_adj[idx_v1]->NaoDom.push_back(final);
+
             if (!in_direcionado) {
                 Aresta* origem = new Aresta(v1, peso);
                 lista_adj[idx_v2]->arestas.push_back(origem);
+
+                lista_adj[idx_v2]->NaoDom.push_back(origem);
             }
 
         } else {
             Aresta* final = new Aresta(v2);
             lista_adj[idx_v1]->arestas.push_back(final);
 
+            lista_adj[idx_v1]->NaoDom.push_back(final);
+
             if (!in_direcionado) {
                 Aresta* origem = new Aresta(v1);
                 lista_adj[idx_v2]->arestas.push_back(origem);
+
+                lista_adj[idx_v2]->NaoDom.push_back(origem);
             }
         }
     }
