@@ -5,7 +5,7 @@
 #include "Grafo.h"
 #include "No.h"
 #include "Hash_unica.h"
-
+#include <utility>
 // CRIADO PELO GRUPO - Igor Correa Trifilio Campos 202365092AB
 /*
 Alunos:
@@ -16,6 +16,7 @@ Gabriel Toledo Gonçalves Barreto
 
 Repositório: https://github.com/Rogire/t1-dcc059-2025-1
 */
+
 class CDS_guloso
 {
     public:
@@ -23,10 +24,12 @@ class CDS_guloso
         ~CDS_guloso() {};
 
         std::vector<No*>CDS(Grafo* grafo);
-        std::vector<No *> CDS_teste(Grafo *grafo);
+        std::vector<No *> CDS_teste_randomizado(Grafo *grafo,float alpha);
+        std::vector<No *> CDS_teste_randomizado_reativo(Grafo *grafo, float alpha);
+
     private:
-        par<bool, int> *adjDominante(No *node);
-        par<bool, int> *adjDominante_teste(No *node);
+        //par<bool, int> *adjDominante(No *node);
+        std::pair<bool, int> *adjDominante(No *node);
 
         HASH_unica *Hash_nodes;
 };
