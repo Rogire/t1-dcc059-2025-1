@@ -186,7 +186,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         c++;
         if (Candidatos[j] == maior_ord)
         {
-            std::cout << "Nó removido: " << maior_ord->id << '\n';
             Candidatos.erase(Candidatos.begin() + j);
             break;
         }
@@ -200,11 +199,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
         int Maior_n_adj_nd = INT_MIN;
         int Menor_n_adj_nd = INT_MAX;
-
-        std::cout << "Candidatos:\n";
-        for (auto c : Candidatos)
-            std::cout << c->id << " ";
-        std::cout << "\n";
 
         // encontra qual é o limite para o cálculo do limite
         for (int j = 0; j < Candidatos.size(); j++)
@@ -225,12 +219,10 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
             if((nos_dominados == 0 && node->NaoDom.size() == 1) || node->NaoDom.empty())
             {
-                std::cout << "Node: " << node->id << " removido\n";
                 Candidatos.erase(Candidatos.begin() + j);
                 j--;
                 continue;
             }
-            std::cout << "node " << node->id << ((node->adj_Dominante) ? (" é adj dominante\n") : (" não é adj dominante\n"));
             if (node->adj_Dominante || nos_dominados == 0)
             {
                 int valor = node->NaoDom.size();
@@ -240,10 +232,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
             }
         }
 
-        std::cout << "acabou for candidatos\n";
-
-        std::cout << Maior_n_adj_nd<<", ";
-        std::cout << Menor_n_adj_nd<<"\n";
         int limite_inferior = Maior_n_adj_nd - static_cast<int>(alpha * (Maior_n_adj_nd - Menor_n_adj_nd));
         std::vector<No*> RCL;
 
@@ -251,10 +239,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         // seu num adj nd maior que o limite mínimo estabelecido
         for (auto& candidato : Candidatos)
         {
-            std::cout << "node " << candidato->id << ((candidato->adj_Dominante)?(" é adj dominante\n"):(" não é adj dominante\n"));
-            std::cout << candidato->NaoDom.size() << ", " << limite_inferior <<", "<<(candidato->NaoDom.size() >= limite_inferior ? "sim" : "não")<<"\n";
-            std::cout<< "nos dominados: " << nos_dominados << "\n";
-
             c++;
             if(candidato->adj_Dominante || nos_dominados == 0)
                 if (candidato->NaoDom.size() >= limite_inferior)
@@ -263,7 +247,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
         if (RCL.empty())
         {
-            std::cout << "Entrou pq ngm bateu o limite\n";
             for (auto &candidato : Candidatos)
             {
                 c++;
@@ -273,11 +256,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         }
      
         int indice_aleatorio = rand() % RCL.size();
-
-        std::cout << "RCL:\n";
-        for(auto c : RCL)
-            std::cout << c->id << " ";
-        std::cout << "\n";
 
         // Pega um aleatório dos melhores e adiciona aos dominantes, repete isso até acabar os elementos
         No *prox = RCL[indice_aleatorio];
@@ -309,7 +287,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
             c++;
             if (Candidatos[j] == prox)
             {
-                std::cout << "Nó removido: " << prox->id << '\n';
                 Candidatos.erase(Candidatos.begin() + j);
                 break;
             }
