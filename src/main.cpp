@@ -15,43 +15,57 @@ Repositório: https://github.com/Rogire/t1-dcc059-2025-1
 using namespace std;
 int main(int argc, char *argv[])
 {
-
     Grafo* grafo = new Grafo();
     grafo->montar_Grafo_por_arquivo(argv[1]);
+    int selecao = -1;
 
-    //grafo->CDS_guloso();
+    while(selecao == -1)
+    {
+        std::cout << "Selecione o que deseja fazer:\n(1) Parte 1\n(2) Parte 2\n";
+        cin >> selecao;
 
-    //Gerenciador::comandos(grafo);
+        if(selecao == 1 || selecao == 2)
+        {}
+        else
+            selecao = -1;
+    }
 
-    CDS_guloso solver;
+    if(selecao == 1)
+         Gerenciador::comandos(grafo);
+    else
+    {
+        CDS_guloso solver;
 
-    // =============================
-    // 1. Guloso Puro
-    // =============================
+        srand(static_cast<unsigned int>(time(NULL)));
 
-    cout << "\n=== Guloso Puro ===\n";
-    auto ini1 = std::chrono::high_resolution_clock::now();
-    vector<No*> resG = solver.CDS(grafo);
-    auto fim1 = std::chrono::high_resolution_clock::now();
-    double tempo1 = std::chrono::duration<double>(fim1 - ini1).count();
+        cout << "\n=== Guloso Puro ===\n";
+        auto ini1 = std::chrono::high_resolution_clock::now();
+        vector<No*> resG = solver.CDS(grafo);
+        auto fim1 = std::chrono::high_resolution_clock::now();
+        double tempo1 = std::chrono::duration<double>(fim1 - ini1).count();
 
-    cout << "Conjunto Dominante Conexo (Guloso): { ";
-    for (No* c : resG)
-        cout << c->id << " ";
-    cout << "}\nTamanho: " << resG.size()
-         << " | Tempo (s): " << tempo1 << endl;
+        cout << "Conjunto Dominante Conexo (Guloso): { ";
+        for (No* c : resG)
+            cout << c->id << " ";
+        cout << "}\nTamanho: " << resG.size()
+            << " | Tempo (s): " << tempo1 << endl;
 
-    cout << "\n=== Guloso Randomizado ===\n";
-    auto ini2 = std::chrono::high_resolution_clock::now();
-    vector<No *> resG_Rnd = solver.CDS_teste_randomizado(grafo, 0.5);
-    auto fim2 = std::chrono::high_resolution_clock::now();
-    double tempo2 = std::chrono::duration<double>(fim2 - ini2).count();
-    
-    cout << "Conjunto Dominante Conexo (Guloso Aleatório): { ";
-    for (No *c : resG_Rnd)
-        cout << c->id << " ";
-    cout << "}\nTamanho: " << resG_Rnd.size()
-         << " | Tempo (s): " << tempo2 << endl;
+        cout << "\n=== Guloso Randomizado ===\n";
+        auto ini2 = std::chrono::high_resolution_clock::now();
+        vector<No *> resG_Rnd = solver.CDS_teste_randomizado(grafo, 0.3);
+        auto fim2 = std::chrono::high_resolution_clock::now();
+        double tempo2 = std::chrono::duration<double>(fim2 - ini2).count();
+        
+        cout << "Conjunto Dominante Conexo (Guloso Aleatório): { ";
+        for (No *c : resG_Rnd)
+            cout << c->id << " ";
+        cout << "}\nTamanho: " << resG_Rnd.size()
+            << " | Tempo (s): " << tempo2 << endl;
 
+        std::vector<float> alphas = {0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1};
+
+        cout << "\n=== Guloso Randomizado Reativo ===\n";
+        solver.CDS_teste_randomizado_reativo(grafo,alphas, 2500,50);
+    }
     return 0;
 }

@@ -6,6 +6,9 @@
 #include "No.h"
 #include "Hash_unica.h"
 #include <utility>
+#include <chrono>
+#include <set>
+#include <random>
 // CRIADO PELO GRUPO - Igor Correa Trifilio Campos 202365092AB
 /*
 Alunos:
@@ -25,7 +28,7 @@ class CDS_guloso
 
         std::vector<No*>CDS(Grafo* grafo);
         std::vector<No *> CDS_teste_randomizado(Grafo *grafo,float alpha);
-        std::vector<No *> CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> alphas);
+        void CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter, int bloco);
         void adjDominante(No *node);
 
     private:

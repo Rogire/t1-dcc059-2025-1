@@ -122,8 +122,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
     std::vector<No *> Candidatos = grafo->lista_adj, Dominantes;
     int nos_dominados{0}, total_nos = grafo->lista_adj.size();
 
-    srand(static_cast<unsigned int>(time(NULL)));
-
     // reinicia os paramêtros dos nós para caso outros algoritmos já tenham sido rodados antes
     reiniciar_variaveis(&Candidatos);
 
@@ -214,35 +212,91 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
     return Dominantes;
 }
 
-class APQM
+//==========================================================================================================================
+void CDS_guloso::CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter,int bloco)
 {
-public:
-    APQM(float alpha, float probI)
-    {
-        this->alp = alpha;
-        this->prob = probI;
-    };
-    ~APQM() {};
-
-private:
-    float alp;
-    float med = -1;
-    float q = -1;
-    float prob;
-};
-
-std::vector<No *> CDS_guloso::CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> alphas)
-{
-    float probInicial = 1 / static_cast<int>(alphas.size());
-
-    std::vector<APQM> valoresCalc;
-
-    for(float a : alphas)
-        valoresCalc.push_back(APQM(a,probInicial));
-
+    int numAlphas = static_cast<int>(alphas.size());
+    float probInicial = 1.0f/numAlphas;
+    float dif = 0.1f;
     
+    int melhor_tamanho{INT_MAX};
+    float melhor_alpha{};
+    double melhor_tempo{INT_MAX};
+    std::vector<No *> Melhor_solucao;
+    double melhor_media_tamanho, melhor_media_tempo;
 
-    //std::vector<No*> Dominantes = CDS_teste_randomizado(grafo, alpha);
+    std::vector<int>    usos(numAlphas, 0);
+    std::vector<int>    Tamanhos(numAlphas,0);
+    std::vector<double> Tempos(numAlphas, 0.0);
+    std::vector<float>  probabilidades(numAlphas,probInicial);
+    std::vector<double> mediaTam(numAlphas, 0), mediaTempo(numAlphas, 0);
 
-    return {}; // Dominantes;
+    for (int i{0}; i < numIter; i++)
+    {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::discrete_distribution<> dist(probabilidades.begin(), probabilidades.end());
+        
+        int pos = dist(gen);
+        float alpha_at = alphas[pos];
+
+        auto ini = std::chrono::high_resolution_clock::now();
+        vector<No *> resG = CDS_teste_randomizado(grafo, alpha_at);
+        auto fim = std::chrono::high_resolution_clock::now();
+
+        double tempo_at = std::chrono::duration<double>(fim - ini).count();
+        int t_at = static_cast<int>(resG.size());
+
+        usos[pos]++;
+        Tamanhos[pos] += t_at;
+        Tempos[pos] += tempo_at;
+
+        if(t_at < melhor_tamanho)
+        {
+            melhor_tamanho = t_at;
+            Melhor_solucao = resG;
+            melhor_alpha = alpha_at;
+        }
+
+        if (i % bloco == 0)
+        {
+            std::vector<double> qualidades(numAlphas, 0.0);
+            double somaQuali{0.0};
+            for (int i = 0; i < numAlphas; i++)
+                if (usos[i] > 0)
+                {
+                    qualidades[i] = 1.0 / (Tamanhos[i] / usos[i]);
+                    somaQuali += qualidades[i];
+                }
+
+            if (somaQuali > 0)
+                for (int i = 0; i < numAlphas; i++)
+                    probabilidades[i] = (qualidades[i]+dif) / (somaQuali+dif);
+        }
+    }
+
+    for (int i = 0; i < numAlphas; i++)
+    {
+        mediaTam[i] = usos[i] ? (double)Tamanhos[i] / usos[i] : 0;
+        mediaTempo[i] = usos[i] ? Tempos[i] / usos[i] : 0;
+
+        if(mediaTam[i] < melhor_media_tamanho)
+        {
+            melhor_media_tamanho = mediaTam[i];
+            melhor_alpha = alphas[i];
+        }
+    }
+
+    // Imprime o resultado final do algoritmo
+    std::cout << "\n=== Resultado Final ===\n";
+    std::cout << "Melhor solução encontrada: { ";
+    for (No* no : Melhor_solucao)
+        std::cout << no->id << " ";
+    std::cout << "}\nTamanho: " << melhor_tamanho << "\nAlpha correspondente: " << melhor_alpha << "\n\n";
+    std::cout << "Médias por α:\n";
+
+    for (int i = 0; i < numAlphas; i++)
+    {
+        std::cout << "α = " << alphas[i] << " | Média tamanho: " << mediaTam[i] << " | Média tempo (s): " << mediaTempo[i] << "\n";
+    }
 }
