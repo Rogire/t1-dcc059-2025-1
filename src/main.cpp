@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
         cout << "\n=== Guloso Randomizado ===\n";
         auto ini2 = std::chrono::high_resolution_clock::now();
-        vector<No *> resG_Rnd = solver.CDS_teste_randomizado(grafo, 0.3);
+        vector<No *> resG_Rnd = solver.CDS_teste_randomizado(grafo, 1);
         auto fim2 = std::chrono::high_resolution_clock::now();
         double tempo2 = std::chrono::duration<double>(fim2 - ini2).count();
         
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         cout << "}\nTamanho: " << resG_Rnd.size()
             << " | Tempo (s): " << tempo2 << endl;
 
-        std::vector<float> alphas = {0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1};
+        std::vector<float> alphas = {1,0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1};
 
         cout << "\n=== Guloso Randomizado Reativo ===\n";
         solver.CDS_teste_randomizado_reativo(grafo,alphas, 2500,50);

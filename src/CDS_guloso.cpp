@@ -191,9 +191,13 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
                     RCL.push_back(candidato);
             }
         }
-     
-        int indice_aleatorio = rand() % RCL.size();
+        
+        if(RCL.empty() && grafo->in_direcionado)
+            for (auto &candidato : Candidatos)
+                RCL.push_back(candidato);
 
+        int indice_aleatorio = rand() % RCL.size();
+    
         // Pega um aleatório dos melhores e adiciona aos dominantes, repete isso até acabar os elementos
         No *prox = RCL[indice_aleatorio];
         marcar_como_dominante(prox, nos_dominados, &Dominantes, &Candidatos, Hash_nodes);
@@ -265,7 +269,7 @@ void CDS_guloso::CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> 
             for (int i = 0; i < numAlphas; i++)
                 if (usos[i] > 0)
                 {
-                    qualidades[i] = 1.0 / (Tamanhos[i] / usos[i]);
+                    qualidades[i] = 1.0 / ((double)Tamanhos[i] / usos[i]);
                     somaQuali += qualidades[i];
                 }
 
