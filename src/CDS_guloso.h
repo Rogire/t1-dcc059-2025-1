@@ -25,7 +25,7 @@ class CDS_guloso
 
         std::vector<No*>CDS(Grafo* grafo);
         std::vector<No *> CDS_teste_randomizado(Grafo *grafo,float alpha);
-        std::vector<No *> CDS_teste_randomizado_reativo(Grafo *grafo, float alpha);
+        std::vector<No *> CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> alphas);
         void adjDominante(No *node);
 
     private:
