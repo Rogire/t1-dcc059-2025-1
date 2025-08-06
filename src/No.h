@@ -23,7 +23,7 @@ public:
     bool dominado = false;
     
     bool adj_Dominante = false;
-    int adj_ND = -1;
+    int adj_ND = 0;
 };
 
 #endif //NO_H

@@ -4,29 +4,19 @@
 // todo vértice do grafo está ou no conjunto ou é adjacente a pelo menos um vértice do conjunto
 // O(V² + VE)
 
-std::pair<bool,int>*CDS_guloso::adjDominante(No *node)
+void CDS_guloso::adjDominante(No *node)
 {
-    bool adj_Dom{false};
-    int n_adj_nD{0};
-
     for (int i = node->NaoDom.size() - 1; i >= 0; i--)
     {
-        Aresta *a = node->arestas[i];
+        Aresta *a = node->NaoDom[i];
         No *vizinho = this->Hash_nodes->get(a->id_no_alvo);
 
         if (vizinho->dominante)
-        {
-            adj_Dom = true;
             node->adj_Dominante = true;
-        }
-        else if (!vizinho->dominado)
-            n_adj_nD++;
-        else
-            node->NaoDom.erase(node->NaoDom.begin() + i);
         
-        }
-
-    return new std::pair(adj_Dom, n_adj_nD);
+        if (vizinho->dominado)
+            node->NaoDom.erase(node->NaoDom.begin() + i);
+    }
 }
 
 //===========================================================================================================
@@ -40,7 +30,7 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
     int nos_dominados{0}, total_nos = grafo->lista_adj.size();
 
     //par<bool, int> *info_vertice_atual;
-    std::pair<bool, int> *info_vertice_atual;
+    //std::pair<bool, int> *info_vertice_atual;
     int i{0}, c{0}, it_aresta{0}, totA{0};
     
     for (No *n : Candidatos)
@@ -58,37 +48,39 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
         it_aresta = 0;
 
         No *prox{};
-        int adj_ND_at{INT_MIN}, i_prox{};
+        int adj_ND_at{INT_MIN}, i_prox{-1};
 
         // monta o vetor de candidatos
-        for (int i{0}; i < Candidatos.size(); i++)
+        for (int j{0}; j < Candidatos.size(); j++)
         {
             c++;
-            No *node = Candidatos.at(i);
+            No *node = Candidatos.at(j);
 
-            if(nos_dominados == 0 && node->NaoDom.empty())
-                node->NaoDom = node->arestas;
-
-            it_aresta += node->NaoDom.size();
-            info_vertice_atual = adjDominante(node);
-
-            if (info_vertice_atual->second == 0)
+            if (node->NaoDom.empty())
             {
-                Candidatos.erase(Candidatos.begin() + i);
-                i--;
+                Candidatos.erase(Candidatos.begin() + j);
+                j--;
                 continue;
             }
 
+            it_aresta += node->NaoDom.size();
+            adjDominante(node);
 
-            if(info_vertice_atual->first || nos_dominados == 0)
+            if(node->adj_Dominante || nos_dominados == 0)
             {
-                if (info_vertice_atual->second > adj_ND_at)
+                if (static_cast<int>(node->NaoDom.size()) > adj_ND_at)
                 {
                     prox = node;
-                    i_prox = i;
-                    adj_ND_at = info_vertice_atual->second;
+                    i_prox = j;
+                    adj_ND_at = static_cast<int>(node->NaoDom.size());
                 }
             }
+        }
+
+        if(prox == nullptr || i_prox == -1)
+        {
+            std::cerr << "Nenhum candidato.\n";
+            break;
         }
 
         prox->dominante = true;
@@ -131,7 +123,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
     std::vector<No *> Candidatos = grafo->lista_adj, Dominantes;
     int nos_dominados{0}, total_nos = grafo->lista_adj.size();
-    std::pair<bool, int> *info_vertice_atual;
     int i{0}, c{0}, it_aresta{0}, totA{0};
 
     srand(static_cast<unsigned int>(time(NULL)));
@@ -154,29 +145,26 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         int Maior_n_adj_nd = INT_MIN;
         int Menor_n_adj_nd = INT_MAX;
 
-        std::vector<std::pair<No *, int>> candidatos_com_valor;
-
-        // monta o vetor com os melhores candidatos (adjacentes a dominante e com maior num adj nd)
+        // encontra qual é o limite para o cálculo do limite
         for (int j = 0; j < Candidatos.size(); j++)
         {
+            c++;
             No *node = Candidatos[j];
-            it_aresta += node->NaoDom.size();
-            info_vertice_atual = adjDominante(node);
 
-            int num_adj_nd_atual = info_vertice_atual->second;
-            bool atual_eh_adj_dom = info_vertice_atual->first;
-
-            if (num_adj_nd_atual == 0)
+            if (node->NaoDom.empty())
             {
+                std::cout << "Node: " << node->id << " removido\n";
                 Candidatos.erase(Candidatos.begin() + j);
                 j--;
                 continue;
             }
+            it_aresta += node->NaoDom.size();
+            
+            adjDominante(node);
 
-            if (atual_eh_adj_dom || nos_dominados == 0)
+            if (node->adj_Dominante || nos_dominados == 0)
             {
-                int valor = num_adj_nd_atual;
-                candidatos_com_valor.push_back({node, valor});
+                int valor = node->NaoDom.size();
 
                 Maior_n_adj_nd = std::max(Maior_n_adj_nd, valor);
                 Menor_n_adj_nd = std::min(Menor_n_adj_nd, valor);
@@ -184,13 +172,17 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         }
 
         int limite_inferior = Maior_n_adj_nd - static_cast<int>(alpha * (Maior_n_adj_nd - Menor_n_adj_nd));
-        std::vector<std::pair<No *, int>> RCL;
+        std::vector<No *> RCL;
 
-        //o vetor RCL é montado com uma parcela do vetor de candidatos original, de acordo com os elementos que possuirem
-        //seu num adj nd maior que o limite mínimo estabelecido 
-        for (auto &candidato : candidatos_com_valor)
-            if (candidato.second >= limite_inferior)
+        // o vetor RCL é montado com uma parcela do vetor de candidatos original, de acordo com os elementos que possuirem
+        // seu num adj nd maior que o limite mínimo estabelecido
+        for (auto &candidato : Candidatos)
+        {
+            c++;
+            if (candidato->NaoDom.size() >= limite_inferior)
                 RCL.push_back(candidato);
+        }
+            
         
         if (RCL.empty())
             break;
@@ -198,7 +190,7 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         int indice_aleatorio = rand() % RCL.size();
 
         //Pega um aleatório dos melhores e adiciona aos dominantes, repete isso até acabar os elementos
-        No *prox = RCL[indice_aleatorio].first;
+        No *prox = RCL[indice_aleatorio];
         prox->dominante = true;
 
         if (!prox->dominado)
@@ -223,7 +215,7 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
         for (int j = 0; j < Candidatos.size(); j++)
         {
-            i++;
+            c++;
             if (Candidatos[j] == prox)
             {
                 Candidatos.erase(Candidatos.begin() + j);

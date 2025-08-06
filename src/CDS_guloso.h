@@ -26,11 +26,9 @@ class CDS_guloso
         std::vector<No*>CDS(Grafo* grafo);
         std::vector<No *> CDS_teste_randomizado(Grafo *grafo,float alpha);
         std::vector<No *> CDS_teste_randomizado_reativo(Grafo *grafo, float alpha);
+        void adjDominante(No *node);
 
     private:
-        //par<bool, int> *adjDominante(No *node);
-        std::pair<bool, int> *adjDominante(No *node);
-
         HASH_unica *Hash_nodes;
 };
 
