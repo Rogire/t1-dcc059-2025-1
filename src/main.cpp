@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     cout << "\n=== Guloso Randomizado ===\n";
     auto ini2 = std::chrono::high_resolution_clock::now();
-    vector<No *> resG_Rnd = solver.CDS_teste_randomizado(grafo, 1);
+    vector<No *> resG_Rnd = solver.CDS_teste_randomizado(grafo, 0.5);
     auto fim2 = std::chrono::high_resolution_clock::now();
     double tempo2 = std::chrono::duration<double>(fim2 - ini2).count();
     

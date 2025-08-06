@@ -11,11 +11,44 @@ void CDS_guloso::adjDominante(No *node)
         Aresta *a = node->NaoDom[i];
         No *vizinho = this->Hash_nodes->get(a->id_no_alvo);
 
-        if (vizinho->dominante)
-            node->adj_Dominante = true;
-        
         if (vizinho->dominado)
             node->NaoDom.erase(node->NaoDom.begin() + i);
+    }
+}
+
+void reiniciar_variaveis(std::vector<No*>* Candidatos)
+{
+    for (No *n : *Candidatos)
+    {
+        n->NaoDom = n->arestas;
+        n->dominante = false;
+        n->dominado = false;
+        n->adj_Dominante = false;
+    }
+}
+
+void marcar_como_dominante(No *node, int &nos_dominados, std::vector<No *> *Dominantes, std::vector<No *> *Candidatos, HASH_unica *Hash_nodes)
+{
+    node->dominante = true;
+
+    if (!node->dominado)
+    {
+        node->dominado = true;
+        nos_dominados++;
+    }
+
+    Dominantes->push_back(node);
+
+    for (Aresta *a : node->arestas)
+    {
+        No *vizinho = Hash_nodes->get(a->id_no_alvo);
+
+        if (!vizinho->dominado)
+        {
+            vizinho->dominado = true;
+            vizinho->adj_Dominante = true;
+            nos_dominados++;
+        }
     }
 }
 
@@ -29,31 +62,17 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
     std::vector<No *> Candidatos = grafo->lista_adj, Dominantes;
     int nos_dominados{0}, total_nos = grafo->lista_adj.size();
 
-    //par<bool, int> *info_vertice_atual;
-    //std::pair<bool, int> *info_vertice_atual;
-    int i{0}, c{0}, it_aresta{0}, totA{0};
-    
-    for (No *n : Candidatos)
-    {
-        i++;
-        n->NaoDom = n->arestas;
-        n->dominante = false;
-        n->dominado = false;
-        n->adj_Dominante = false;
-    }
+    // reinicia os paramêtros dos nós para caso outros algoritmos já tenham sido rodados antes
+    reiniciar_variaveis(&Candidatos);
 
     while (nos_dominados < total_nos)
     {
-        i++;
-        it_aresta = 0;
-
         No *prox{};
         int adj_ND_at{INT_MIN}, i_prox{-1};
 
         // monta o vetor de candidatos
         for (int j{0}; j < Candidatos.size(); j++)
         {
-            c++;
             No *node = Candidatos.at(j);
 
             if (node->NaoDom.empty())
@@ -63,7 +82,6 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
                 continue;
             }
 
-            it_aresta += node->NaoDom.size();
             adjDominante(node);
 
             if(node->adj_Dominante || nos_dominados == 0)
@@ -82,40 +100,14 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
             std::cerr << "Nenhum candidato.\n";
             break;
         }
-
-        prox->dominante = true;
-
-        if (!prox->dominado)
-        {
-            prox->dominado = true;
-            nos_dominados++;
-        }
-
-        Dominantes.push_back(prox);
-
-        for (Aresta *a : prox->arestas)
-        {
-            it_aresta++;
-
-            No *vizinho = Hash_nodes->get(a->id_no_alvo);
-
-            if (!vizinho->dominado)
-            {
-                vizinho->dominado = true;
-                nos_dominados++;
-            }
-        }
+        marcar_como_dominante(prox, nos_dominados, &Dominantes, &Candidatos, Hash_nodes);
 
         Candidatos.erase(Candidatos.begin() + i_prox);
-        i--;
-        totA += it_aresta;
-    }
 
-    std::cout << "Pra pegar os vértices dominantes iterou " << i + c + totA << " vezes\n";
+    }
 
     return Dominantes;
 }
-
 
 vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 {
@@ -129,19 +121,11 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
     std::vector<No *> Candidatos = grafo->lista_adj, Dominantes;
     int nos_dominados{0}, total_nos = grafo->lista_adj.size();
-    int i{0}, c{0}, it_aresta{0}, totA{0};
 
     srand(static_cast<unsigned int>(time(NULL)));
 
     // reinicia os paramêtros dos nós para caso outros algoritmos já tenham sido rodados antes
-    for (No *n : Candidatos)
-    {
-        i++;
-        n->NaoDom = n->arestas;
-        n->dominante = false;
-        n->dominado = false;
-        n->adj_Dominante = false;
-    }
+    reiniciar_variaveis(&Candidatos);
 
     int maior_primeiro{INT_MIN}, i_primeiro{};
 
@@ -158,44 +142,10 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         }
     }
 
-    maior_ord->dominante = true;
-
-    if (!maior_ord->dominado)
-    {
-        maior_ord->dominado = true;
-        nos_dominados++;
-    }
-
-    Dominantes.push_back(maior_ord);
-
-    for (Aresta *a : maior_ord->arestas)
-    {
-        it_aresta++;
-        No *vizinho = Hash_nodes->get(a->id_no_alvo);
-
-        if (!vizinho->dominado)
-        {
-            vizinho->dominado = true;
-            vizinho->adj_Dominante = true;
-            nos_dominados++;
-        }
-    }
-
-    for (int j = 0; j < Candidatos.size(); j++)
-    {
-        c++;
-        if (Candidatos[j] == maior_ord)
-        {
-            Candidatos.erase(Candidatos.begin() + j);
-            break;
-        }
-    }
-    totA += it_aresta;
+    marcar_como_dominante(maior_ord, nos_dominados, &Dominantes, &Candidatos, Hash_nodes);
 
     while (nos_dominados < total_nos)
     {
-        i++;
-        it_aresta = 0;
 
         int Maior_n_adj_nd = INT_MIN;
         int Menor_n_adj_nd = INT_MAX;
@@ -203,26 +153,17 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         // encontra qual é o limite para o cálculo do limite
         for (int j = 0; j < Candidatos.size(); j++)
         {
-            c++;
             No *node = Candidatos[j];
 
-            it_aresta += node->NaoDom.size();
+            adjDominante(node);
 
-            for (int i = node->NaoDom.size() - 1; i >= 0; i--)
-            {
-                Aresta *a = node->NaoDom[i];
-                No *vizinho = this->Hash_nodes->get(a->id_no_alvo);
-
-                if (vizinho->dominado)
-                    node->NaoDom.erase(node->NaoDom.begin() + i);
-            }
-
-            if((nos_dominados == 0 && node->NaoDom.size() == 1) || node->NaoDom.empty())
+            if ((nos_dominados == 0 && node->NaoDom.size() == 1) || node->NaoDom.empty())
             {
                 Candidatos.erase(Candidatos.begin() + j);
                 j--;
                 continue;
             }
+
             if (node->adj_Dominante || nos_dominados == 0)
             {
                 int valor = node->NaoDom.size();
@@ -239,7 +180,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         // seu num adj nd maior que o limite mínimo estabelecido
         for (auto& candidato : Candidatos)
         {
-            c++;
             if(candidato->adj_Dominante || nos_dominados == 0)
                 if (candidato->NaoDom.size() >= limite_inferior)
                     RCL.push_back(candidato);
@@ -249,7 +189,6 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         {
             for (auto &candidato : Candidatos)
             {
-                c++;
                 if (candidato->adj_Dominante || nos_dominados == 0)
                     RCL.push_back(candidato);
             }
@@ -259,42 +198,19 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
         // Pega um aleatório dos melhores e adiciona aos dominantes, repete isso até acabar os elementos
         No *prox = RCL[indice_aleatorio];
-        prox->dominante = true;
-
-        if (!prox->dominado)
-        {
-            prox->dominado = true;
-            nos_dominados++;
-        }
-
-        Dominantes.push_back(prox);
-
-        for (Aresta *a : prox->arestas)
-        {
-            it_aresta++;
-            No *vizinho = Hash_nodes->get(a->id_no_alvo);
-
-            if (!vizinho->dominado)
-            {
-                vizinho->dominado = true;
-                vizinho->adj_Dominante = true;
-                nos_dominados++;
-            }
-        }
+        marcar_como_dominante(prox, nos_dominados, &Dominantes, &Candidatos, Hash_nodes);
 
         for (int j = 0; j < Candidatos.size(); j++)
         {
-            c++;
-            if (Candidatos[j] == prox)
+            if (Candidatos.at(j) == prox)
             {
                 Candidatos.erase(Candidatos.begin() + j);
                 break;
             }
         }
-        totA += it_aresta;
+
     }
 
-    std::cout << "Algoritmo randomizado iterou " << i + c + totA << " vezes\n";
     return Dominantes;
 }
 
