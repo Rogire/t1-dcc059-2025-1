@@ -199,7 +199,7 @@ vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
 
         if(RCL.size() == 0)
         {
-            std::cerr << "Deu nn\n";
+            std::cerr << "Nenhum candidato.\n";
             exit(0);
         }
 
