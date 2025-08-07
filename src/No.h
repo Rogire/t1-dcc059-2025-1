@@ -16,12 +16,12 @@ public:
     bool marca; // usada pra indicar que o no ja foi analisado
     
     vector<Aresta*> arestas;
-    vector<Aresta*> NaoDom;
 
     //========================= Parte 2 =========================================
     bool dominante = false;
     bool dominado = false;
-    
+    vector<Aresta *> NaoDom;
+
     bool adj_Dominante = false;
     int adj_ND = 0;
 };

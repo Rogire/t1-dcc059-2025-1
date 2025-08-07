@@ -109,7 +109,7 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
     return Dominantes;
 }
 
-vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
+vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
 {
     if(alpha > 1)
     {
@@ -127,6 +127,7 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
     int maior_primeiro{INT_MIN}, i_primeiro{};
 
+    
     No *maior_ord{};
     for (int j = 0; j < Candidatos.size(); j++)
     {
@@ -141,7 +142,7 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
     }
 
     marcar_como_dominante(maior_ord, nos_dominados, &Dominantes, &Candidatos, Hash_nodes);
-
+    
     while (nos_dominados < total_nos)
     {
 
@@ -176,14 +177,14 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
 
         // o vetor RCL é montado com uma parcela do vetor de candidatos original, de acordo com os elementos que possuirem
         // seu num adj nd maior que o limite mínimo estabelecido
-        for (auto& candidato : Candidatos)
+        for(auto& candidato : Candidatos)
         {
             if(candidato->adj_Dominante || nos_dominados == 0)
                 if (candidato->NaoDom.size() >= limite_inferior)
                     RCL.push_back(candidato);
         }
 
-        if (RCL.empty())
+        if(RCL.empty())
         {
             for (auto &candidato : Candidatos)
             {
@@ -195,6 +196,12 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
         if(RCL.empty() && grafo->in_direcionado)
             for (auto &candidato : Candidatos)
                 RCL.push_back(candidato);
+
+        if(RCL.size() == 0)
+        {
+            std::cerr << "Deu nn\n";
+            exit(0);
+        }
 
         int indice_aleatorio = rand() % RCL.size();
     
@@ -210,14 +217,12 @@ vector<No *> CDS_guloso::CDS_teste_randomizado(Grafo *grafo, float alpha)
                 break;
             }
         }
-
     }
-
     return Dominantes;
 }
 
 //==========================================================================================================================
-void CDS_guloso::CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter,int bloco)
+void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter,int bloco)
 {
     int numAlphas = static_cast<int>(alphas.size());
     float probInicial = 1.0f/numAlphas;
@@ -245,7 +250,7 @@ void CDS_guloso::CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> 
         float alpha_at = alphas[pos];
 
         auto ini = std::chrono::high_resolution_clock::now();
-        vector<No *> resG = CDS_teste_randomizado(grafo, alpha_at);
+        vector<No *> resG = CDS_randomizado(grafo, alpha_at);
         auto fim = std::chrono::high_resolution_clock::now();
 
         double tempo_at = std::chrono::duration<double>(fim - ini).count();
@@ -261,7 +266,7 @@ void CDS_guloso::CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> 
             Melhor_solucao = resG;
             melhor_alpha = alpha_at;
         }
-
+    
         if (i % bloco == 0)
         {
             std::vector<double> qualidades(numAlphas, 0.0);
@@ -277,17 +282,17 @@ void CDS_guloso::CDS_teste_randomizado_reativo(Grafo *grafo, std::vector<float> 
                 for (int i = 0; i < numAlphas; i++)
                     probabilidades[i] = (qualidades[i]+dif) / (somaQuali+dif);
         }
-    }
-
-    for (int i = 0; i < numAlphas; i++)
-    {
-        mediaTam[i] = usos[i] ? (double)Tamanhos[i] / usos[i] : 0;
-        mediaTempo[i] = usos[i] ? Tempos[i] / usos[i] : 0;
-
-        if(mediaTam[i] < melhor_media_tamanho)
+        
+        for (int i = 0; i < numAlphas; i++)
         {
-            melhor_media_tamanho = mediaTam[i];
-            melhor_alpha = alphas[i];
+            mediaTam[i] = usos[i] ? (double)Tamanhos[i] / usos[i] : 0;
+            mediaTempo[i] = usos[i] ? Tempos[i] / usos[i] : 0;
+
+            if (mediaTam[i] < melhor_media_tamanho)
+            {
+                melhor_media_tamanho = mediaTam[i];
+                melhor_alpha = alphas[i];
+            }
         }
     }
 
