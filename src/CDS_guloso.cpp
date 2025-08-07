@@ -232,7 +232,7 @@ void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas
     float melhor_alpha{};
     double melhor_tempo{INT_MAX};
     std::vector<No *> Melhor_solucao;
-    double melhor_media_tamanho, melhor_media_tempo;
+    double melhor_media_tamanho{INT_MAX}, melhor_media_tempo{INT_MAX};
 
     std::vector<int>    usos(numAlphas, 0);
     std::vector<int>    Tamanhos(numAlphas,0);
@@ -282,17 +282,17 @@ void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas
                 for (int i = 0; i < numAlphas; i++)
                     probabilidades[i] = (qualidades[i]+dif) / (somaQuali+dif);
         }
-        
-        for (int i = 0; i < numAlphas; i++)
-        {
-            mediaTam[i] = usos[i] ? (double)Tamanhos[i] / usos[i] : 0;
-            mediaTempo[i] = usos[i] ? Tempos[i] / usos[i] : 0;
+    }
 
-            if (mediaTam[i] < melhor_media_tamanho)
-            {
-                melhor_media_tamanho = mediaTam[i];
-                melhor_alpha = alphas[i];
-            }
+    for (int i = 0; i < numAlphas; i++)
+    {
+        mediaTam[i] = usos[i] ? (double)Tamanhos[i] / usos[i] : 0;
+        mediaTempo[i] = usos[i] ? Tempos[i] / usos[i] : 0;
+
+        if (mediaTam[i] < melhor_media_tamanho)
+        {
+            melhor_media_tamanho = mediaTam[i];
+            melhor_alpha = alphas[i];
         }
     }
 
