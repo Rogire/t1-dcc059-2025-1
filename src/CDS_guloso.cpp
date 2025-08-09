@@ -1,8 +1,4 @@
 #include "CDS_guloso.h"
-// Menor conjunto dominante possível
-// Deve ser conexo
-// todo vértice do grafo está ou no conjunto ou é adjacente a pelo menos um vértice do conjunto
-// O(V² + VE)
 
 void CDS_guloso::adjDominante(No *node)
 {
@@ -127,7 +123,7 @@ vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
 
     int maior_primeiro{INT_MIN}, i_primeiro{};
 
-    
+    //pega o primeiro nó de forma gulosa para otimizar o algoritmo (não é estritamente necessário, mas melhora performance)
     No *maior_ord{};
     for (int j = 0; j < Candidatos.size(); j++)
     {
@@ -145,7 +141,6 @@ vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
     
     while (nos_dominados < total_nos)
     {
-
         int Maior_n_adj_nd = INT_MIN;
         int Menor_n_adj_nd = INT_MAX;
 
