@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "par.h"
-
+#include "No.h"
 // CRIADO PELO GRUPO - Igor Correa Trifilio Campos 202365092AB
 /*
 Alunos:

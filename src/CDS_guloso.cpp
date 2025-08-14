@@ -75,14 +75,15 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
         {
             No *node = Candidatos.at(j);
 
-            if (node->NaoDom.empty())
+            if ((nos_dominados == 0 && node->NaoDom.size() == 1) || node->NaoDom.empty())
             {
                 Candidatos.erase(Candidatos.begin() + j);
                 j--;
                 continue;
             }
 
-            adjDominante(node);
+            if(nos_dominados != 0)
+                adjDominante(node);
 
             if(node->adj_Dominante || nos_dominados == 0)
             {
@@ -109,9 +110,10 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
     return Dominantes;
 }
 
-vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
+
+std::vector<No*> CDS_guloso::Construtivo_randomizado(Grafo *grafo,float alpha)
 {
-    if(alpha > 1)
+     if(alpha > 1)
     {
         std::cerr << "ERRO: alpha deve ser um número entre 0 e 1.\n";
         return {};
@@ -154,7 +156,8 @@ vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
         {
             No *node = Candidatos[j];
 
-            adjDominante(node);
+            if(nos_dominados != 0)
+                adjDominante(node);
 
             if ((nos_dominados == 0 && node->NaoDom.size() == 1) || node->NaoDom.empty())
             {
@@ -219,6 +222,11 @@ vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
         }
     }
     return Dominantes;
+}
+
+vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
+{
+   
 }
 
 //==========================================================================================================================
