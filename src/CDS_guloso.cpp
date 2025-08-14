@@ -1,4 +1,6 @@
 #include "CDS_guloso.h"
+#include "No.h"
+#include <vector>
 // Menor conjunto dominante possível
 // Deve ser conexo
 // todo vértice do grafo está ou no conjunto ou é adjacente a pelo menos um vértice do conjunto
@@ -110,14 +112,28 @@ vector<No *> CDS_guloso::CDS(Grafo *grafo)
     return Dominantes;
 }
 
+int get_alpha_index(std::vector<std::vector<elemento>>*& valores_rand_alphas, float alpha)
+{
+    int i=0;
+    for(auto el : *valores_rand_alphas)
+    {
+        if(!el.empty())
+            if(el[0].alpha == alpha)
+                return i;
+        i++;
+    }
+
+    return -1;
+}
 
 std::vector<No*> CDS_guloso::Construtivo_randomizado(Grafo *grafo,float alpha)
 {
-     if(alpha > 1)
+    if(alpha > 1)
     {
         std::cerr << "ERRO: alpha deve ser um número entre 0 e 1.\n";
         return {};
     }
+
     this->Hash_nodes = new HASH_unica(grafo->lista_adj);
     Hash_nodes->InitHash(grafo->lista_adj);
 
@@ -226,11 +242,29 @@ std::vector<No*> CDS_guloso::Construtivo_randomizado(Grafo *grafo,float alpha)
 
 vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
 {
-   
+    int menor_tam = INT_MAX;
+    std::vector<No*> resultado;
+    std::vector<No*> melhor_resultado;
+
+    int num_it = 30;
+    
+   for(int i{0};i<num_it;i++)
+   {
+        resultado = Construtivo_randomizado(grafo, alpha);
+        if(resultado.size() < menor_tam)
+        {
+            menor_tam = resultado.size();
+            melhor_resultado = resultado;   
+        }
+   }
+
+   return melhor_resultado;
 }
 
+
+
 //==========================================================================================================================
-void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter,int bloco)
+elemento CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter,int bloco,bool printar)
 {
     int numAlphas = static_cast<int>(alphas.size());
     float probInicial = 1.0f/numAlphas;
@@ -238,7 +272,7 @@ void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas
     
     int melhor_tamanho{INT_MAX};
     float melhor_alpha{};
-    double melhor_tempo{INT_MAX};
+    double tempo_melhor_solucao{INT_MAX};
     std::vector<No *> Melhor_solucao;
     double melhor_media_tamanho{INT_MAX}, melhor_media_tempo{INT_MAX};
 
@@ -247,6 +281,8 @@ void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas
     std::vector<double> Tempos(numAlphas, 0.0);
     std::vector<float>  probabilidades(numAlphas,probInicial);
     std::vector<double> mediaTam(numAlphas, 0), mediaTempo(numAlphas, 0);
+
+    elemento res;
 
     for (int i{0}; i < numIter; i++)
     {
@@ -270,9 +306,10 @@ void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas
 
         if(t_at < melhor_tamanho)
         {
-            melhor_tamanho = t_at;
-            Melhor_solucao = resG;
-            melhor_alpha = alpha_at;
+            tempo_melhor_solucao = tempo_at;
+            res.solucao = resG;//Melhor_solucao;
+            res.tempo =   tempo_at;//tempo_melhor_solucao;
+            res.alpha =  alpha_at;//melhor_alpha;
         }
     
         if (i % bloco == 0)
@@ -300,20 +337,28 @@ void CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas
         if (mediaTam[i] < melhor_media_tamanho)
         {
             melhor_media_tamanho = mediaTam[i];
+            //es.alpha = alphas[i];
             melhor_alpha = alphas[i];
         }
     }
 
-    // Imprime o resultado final do algoritmo
-    std::cout << "\n=== Resultado Final ===\n";
-    std::cout << "Melhor solução encontrada: { ";
-    for (No* no : Melhor_solucao)
-        std::cout << no->id << " ";
-    std::cout << "}\nTamanho: " << melhor_tamanho << "\nAlpha correspondente: " << melhor_alpha << "\n\n";
-    std::cout << "Médias por α:\n";
-
-    for (int i = 0; i < numAlphas; i++)
+    if(printar)
     {
-        std::cout << "α = " << alphas[i] << " | Média tamanho: " << mediaTam[i] << " | Média tempo (s): " << mediaTempo[i] << "\n";
+        // Imprime o resultado final do algoritmo
+        std::cout << "\n=== Resultado Final ===\n";
+        std::cout << "Melhor solução encontrada: { ";
+        for (No* no : Melhor_solucao)
+            std::cout << no->id << " ";
+        
+            std::cout << "}\nTamanho: " << res.solucao.size() << "\nAlpha correspondente: " << res.alpha << "\n\n";
+        //std::cout << "}\nTamanho: " << melhor_tamanho << "\nAlpha correspondente: " << melhor_alpha << "\n\n";
+        std::cout << "Médias por α:\n";
+
+        for (int i = 0; i < numAlphas; i++)
+        {
+            std::cout << "α = " << alphas[i] << " | Média tamanho: " << mediaTam[i] << " | Média tempo (s): " << mediaTempo[i] << "\n";
+        }
     }
+
+    return res;
 }
