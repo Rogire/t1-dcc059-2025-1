@@ -1,6 +1,3 @@
-#ifndef CDS_guloso_H
-#define CDS_guloso_H
-
 #include "par.h"
 #include "Grafo.h"
 #include "No.h"
@@ -9,6 +6,7 @@
 #include <chrono>
 #include <set>
 #include <random>
+#include <vector>
 // CRIADO PELO GRUPO - Igor Correa Trifilio Campos 202365092AB
 /*
 Alunos:
@@ -19,7 +17,23 @@ Gabriel Toledo Gonçalves Barreto
 
 Repositório: https://github.com/Rogire/t1-dcc059-2025-1
 */
+class elemento{
+    public:
+        std::vector<No*> solucao;
+        double tempo;
+        float alpha;
 
+        elemento(){}
+        ~elemento(){}
+        elemento(std::vector<No*> soluc, double tempo, float alp){
+            this->solucao = soluc;
+            this->tempo = tempo;
+            this->alpha=alp;
+        }
+};
+
+#ifndef CDS_guloso_H
+#define CDS_guloso_H
 class CDS_guloso
 {
     public:
@@ -28,7 +42,8 @@ class CDS_guloso
 
         std::vector<No*>CDS(Grafo* grafo);
         std::vector<No *> CDS_randomizado(Grafo *grafo,float alpha);
-        void CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter, int bloco);
+        std::vector<No*> Construtivo_randomizado(Grafo *grafo,float alpha);
+        elemento CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter, int bloco,bool printar=true);
         void adjDominante(No *node);
 
     private:
@@ -36,3 +51,4 @@ class CDS_guloso
 };
 
 #endif // CDS_guloso_H
+
