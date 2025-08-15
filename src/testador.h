@@ -3,6 +3,7 @@
 
 #include "Gerenciador.h"
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -73,10 +74,13 @@ public:
     void static testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas, bool printar=false)
     {
         std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso;
-        std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso_rand;
+        //std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso_rand;
         std::vector<std::pair<double,std::vector<No*>>> Valores_reativo;
-        
+
+        vector<vector<pair<double,vector<No*>>>> Valores_media_guloso_rand_alphas(static_cast<int>(alphas.size()));
+
         std::pair<double,double> media_guloso, media_guloso_rand, media_reativo;
+        vector<pair<double,double>> media_guloso_rand_alphas(static_cast<int>(alphas.size()));
 
         for(int i{0};i<num_Iter;i++)
         {
@@ -88,11 +92,14 @@ public:
 
             Valores_media_guloso.push_back(std::make_pair(tempo1, resG));
 
-            for(float v : alphas)
+            for(int j{0};j<alphas.size();j++)
             {
+                float v = alphas[j];
                 vector<No *> resG_Rnd;
                 double tempo2 = calcular_tempo(solver,grafo,&resG_Rnd,'b',v);
-                Valores_media_guloso_rand.push_back(std::make_pair(tempo2, resG_Rnd));
+                
+                Valores_media_guloso_rand_alphas[j].push_back(std::make_pair(tempo2, resG_Rnd));
+                //Valores_media_guloso_rand.push_back(std::make_pair(tempo2, resG_Rnd));
             }
 
             vector<No*> resg_G_rnd_reat;
@@ -100,15 +107,23 @@ public:
             Valores_reativo.push_back(std::make_pair(tempo3, resg_G_rnd_reat));
         }
 
+        std::vector<std::pair<double,std::vector<No*>>> pqp;
+
         if(printar)
-            imprimir_valores(Valores_media_guloso, Valores_media_guloso_rand, Valores_reativo, alphas);
+            imprimir_valores(Valores_media_guloso,pqp,Valores_reativo, alphas);
 
         media_guloso = calcular_media(Valores_media_guloso);
-        media_guloso_rand = calcular_media(Valores_media_guloso_rand);
+        //media_guloso_rand = calcular_media(Valores_media_guloso_rand);
         media_reativo = calcular_media(Valores_reativo);
 
+        for(int i{0};i<alphas.size();i++)
+            media_guloso_rand_alphas[i] = calcular_media(Valores_media_guloso_rand_alphas[i]);
+
         std::cout<<"Media Guloso:\nmédia tempo: "<<media_guloso.first<<" média tamanho: "<<media_guloso.second<<"\n";
-        std::cout<<"Media Guloso Randomizado:\nmédia tempo: "<<media_guloso_rand.first<<" média tamanho: "<<media_guloso_rand.second<<"\n";
+        std::cout<<"Media Guloso Randomizado Alphas:\n";
+        for(int i{0};i<alphas.size();i++)
+            std::cout<<"Alpha: "<<alphas[i]<<" média tempo: "<<media_guloso_rand_alphas[i].first<<" média tamanho: "<<media_guloso_rand_alphas[i].second<<"\n";
+        //std::cout<<"Media Guloso Randomizado:\nmédia tempo: "<<media_guloso_rand.first<<" média tamanho: "<<media_guloso_rand.second<<"\n";
         std::cout<<"Media Guloso Randomizado Reativo: \nmédia tempo: "<<media_reativo.first<<" média tamanho: "<<media_reativo.second<<"\n";
     }
 };
