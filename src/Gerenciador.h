@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Grafo.h"
 #include <algorithm>
+#include "CDS_guloso.h"
 
 using namespace std;
 class Gerenciador {
