@@ -19,6 +19,7 @@ void testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas)
 {
     std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso;
     std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso_rand;
+    std::vector<std::pair<double,std::vector<No*>>> Valores_reativo;
     
     //std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso_rand_reat;
     std::vector<elemento> Valores_media_guloso_rand_reat;
@@ -45,9 +46,12 @@ void testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas)
             Valores_media_guloso_rand.push_back(std::make_pair(tempo2, resG_Rnd));
         }
 
-
+        auto ini3 = std::chrono::high_resolution_clock::now();
         auto resg_G_rnd_reat = solver.CDS_randomizado_reativo(grafo,alphas, 300, 30,false);
+        auto fim3 = std::chrono::high_resolution_clock::now();
+        double tempo3 = std::chrono::duration<double>(fim3 - ini3).count();
 
+        Valores_reativo.push_back(std::make_pair(tempo3, resg_G_rnd_reat.solucao));
         Valores_media_guloso_rand_reat.push_back(resg_G_rnd_reat);
     }
 
@@ -59,7 +63,6 @@ void testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas)
             std::cout<<" "<<n->id;
         std::cout<<"\n";
     }
-    
 
     std::cout<<"Valores media Guloso Randomizado: \n";
     for(int i{0};i<alphas.size();i++)
@@ -70,11 +73,18 @@ void testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas)
             std::cout<<" "<<n->id;
         std::cout<<"\n";
     }
-    
 
     std::cout<<"Valores media Guloso Randomizado Reativo: \n";
 
-    int c{0};
+    for(std::pair<double,std::vector<No*>> v : Valores_reativo)
+    {
+        std::cout<<"Tempo: "<<v.first<<" Tamanho: "<<v.second.size();
+        for(auto n : v.second)
+            std::cout<<" "<<n->id;
+        std::cout<<"\n";
+    }
+
+    std::cout<<"Valores media Internos Guloso Randomizado Reativo: \n";
 
     for(auto v : Valores_media_guloso_rand_reat)
     {
@@ -163,5 +173,3 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
-
-

@@ -240,13 +240,11 @@ std::vector<No*> CDS_guloso::Construtivo_randomizado(Grafo *grafo,float alpha)
     return Dominantes;
 }
 
-vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha)
+vector<No *> CDS_guloso::CDS_randomizado(Grafo *grafo, float alpha,int num_it)
 {
     int menor_tam = INT_MAX;
     std::vector<No*> resultado;
     std::vector<No*> melhor_resultado;
-
-    int num_it = 30;
     
    for(int i{0};i<num_it;i++)
    {
@@ -294,7 +292,7 @@ elemento CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> al
         float alpha_at = alphas[pos];
 
         auto ini = std::chrono::high_resolution_clock::now();
-        vector<No *> resG = CDS_randomizado(grafo, alpha_at);
+        vector<No *> resG = CDS_randomizado(grafo, alpha_at,30);
         auto fim = std::chrono::high_resolution_clock::now();
 
         double tempo_at = std::chrono::duration<double>(fim - ini).count();
@@ -307,11 +305,11 @@ elemento CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> al
         if(t_at < melhor_tamanho)
         {
             tempo_melhor_solucao = tempo_at;
-            res.solucao = resG;//Melhor_solucao;
-            res.tempo =   tempo_at;//tempo_melhor_solucao;
-            res.alpha =  alpha_at;//melhor_alpha;
+            res.solucao = resG;
+            res.tempo =   tempo_at;
+            res.alpha =   alpha_at;
         }
-    
+
         if (i % bloco == 0)
         {
             std::vector<double> qualidades(numAlphas, 0.0);
@@ -337,7 +335,6 @@ elemento CDS_guloso::CDS_randomizado_reativo(Grafo *grafo, std::vector<float> al
         if (mediaTam[i] < melhor_media_tamanho)
         {
             melhor_media_tamanho = mediaTam[i];
-            //es.alpha = alphas[i];
             melhor_alpha = alphas[i];
         }
     }
