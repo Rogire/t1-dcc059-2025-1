@@ -366,16 +366,6 @@ vector<char> Grafo::caminho_minimo_dijkstra(char id_no_a, char id_no_b) {
     return caminho;
 }
 
-<<<<<<< HEAD
-vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b) {
-    // Verifica se o grafo é direcionado
-    if (in_direcionado) {
-        cout << "ERRO: O algoritmo de Floyd-Warshall não é aplicável a grafos direcionados." << endl;
-        return {};
-    }
-    // Verifica se o grafo é vazio
-    if (lista_adj.empty()) {
-=======
 vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
 {
     // Verifica se o grafo é direcionado
@@ -393,19 +383,14 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
     // Verifica se o grafo é vazio
     if (lista_adj.empty())
     {
->>>>>>> main
         cout << "ERRO: O grafo está vazio." << endl;
         return {};
     }
     // Verifica se os nós existem no grafo
     int idx_no_a = indice_no(id_no_a);
     int idx_no_b = indice_no(id_no_b);
-<<<<<<< HEAD
-    if (idx_no_a == -1 || idx_no_b == -1) {
-=======
     if (idx_no_a == -1 || idx_no_b == -1)
     {
->>>>>>> main
         cout << "ERRO: Um ou ambos os nós não existem no grafo." << endl;
         return {};
     }
@@ -415,13 +400,6 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
     vector<vector<int>> pai(ordem, vector<int>(ordem, -1));
 
     // Inicializa distâncias e predecessores
-<<<<<<< HEAD
-    for (int i = 0; i < ordem; i++) {
-        dist[i][i] = 0;
-        for (Aresta* aresta : lista_adj[i]->arestas) {
-            int idx_vizinho = indice_no(aresta->id_no_alvo);
-            if (idx_vizinho != -1) {
-=======
     for (int i = 0; i < ordem; i++)
     {
         dist[i][i] = 0;
@@ -430,7 +408,6 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
             int idx_vizinho = indice_no(aresta->id_no_alvo);
             if (idx_vizinho != -1)
             {
->>>>>>> main
                 dist[i][idx_vizinho] = aresta->peso;
                 pai[i][idx_vizinho] = i;
             }
@@ -438,12 +415,6 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
     }
 
     // Floyd-Warshall
-<<<<<<< HEAD
-    for (int k = 0; k < ordem; k++) {
-        for (int i = 0; i < ordem; i++) {
-            for (int j = 0; j < ordem; j++) {
-                if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] + dist[k][j] < dist[i][j]) {
-=======
     for (int k = 0; k < ordem; k++)
     {
         for (int i = 0; i < ordem; i++)
@@ -452,7 +423,6 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
             {
                 if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] + dist[k][j] < dist[i][j])
                 {
->>>>>>> main
                     dist[i][j] = dist[i][k] + dist[k][j];
                     pai[i][j] = pai[k][j];
                 }
@@ -461,12 +431,8 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
     }
 
     // Se não há caminho
-<<<<<<< HEAD
-    if (dist[idx_no_a][idx_no_b] == INT_MAX) {
-=======
     if (dist[idx_no_a][idx_no_b] == INT_MAX)
     {
->>>>>>> main
         cout << "Não há caminho entre os nós " << id_no_a << " e " << id_no_b << "." << endl;
         return {};
     }
@@ -474,15 +440,10 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
     // Reconstrução do caminho mínimo
     vector<char> caminho;
     int atual = idx_no_b;
-<<<<<<< HEAD
-    while (atual != idx_no_a) {
-        if (atual == -1) {
-=======
     while (atual != idx_no_a)
     {
         if (atual == -1)
         {
->>>>>>> main
             cout << "ERRO: Caminho mínimo não encontrado entre os nós " << id_no_a << " e " << id_no_b << "." << endl;
             return {};
         }
@@ -491,18 +452,11 @@ vector<char> Grafo::caminho_minimo_floyd(char id_no_a, char id_no_b)
     }
     caminho.push_back(lista_adj[idx_no_a]->id);
     std::reverse(caminho.begin(), caminho.end());
-<<<<<<< HEAD
-    
-    // Exibe o caminho mínimo encontrado
-    cout << "Caminho minimo de " << id_no_a << " para " << id_no_b << ": ";
-    for (char id : caminho) {
-=======
 
     // Exibe o caminho mínimo encontrado
     cout << "Caminho minimo de " << id_no_a << " para " << id_no_b << ": ";
     for (char id : caminho)
     {
->>>>>>> main
         cout << id << " ";
     }
     cout << endl;
