@@ -86,15 +86,12 @@ void Gerenciador::comandos(Grafo* grafo) {
             char id_no_1 = get_id_entrada();
             char id_no_2 = get_id_entrada();
             vector<char> caminho_minimo_floyd = grafo->caminho_minimo_floyd(id_no_1,id_no_2);
-<<<<<<< HEAD
-=======
             cout << "Caminho mínimo Floyd entre " << id_no_1 << " e " << id_no_2 << ": ";
             for (char id : caminho_minimo_floyd)
             {
                 cout << id << ", ";
             }
             cout << endl;
->>>>>>> main
 
             if(pergunta_imprimir_arquivo("caminho_minimo_floyd.txt")) {
                 grafo->vetorParaArquivo(caminho_minimo_floyd, "caminho_minimo_floyd.txt");
