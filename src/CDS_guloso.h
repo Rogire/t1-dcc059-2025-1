@@ -41,7 +41,7 @@ class CDS_guloso
         ~CDS_guloso() {};
 
         std::vector<No*>CDS(Grafo* grafo);
-        std::vector<No *> CDS_randomizado(Grafo *grafo,float alpha);
+        std::vector<No *> CDS_randomizado(Grafo *grafo,float alpha, int num_it=30);
         std::vector<No*> Construtivo_randomizado(Grafo *grafo,float alpha);
         elemento CDS_randomizado_reativo(Grafo *grafo, std::vector<float> alphas, int numIter, int bloco,bool printar=true);
         void adjDominante(No *node);
@@ -51,4 +51,3 @@ class CDS_guloso
 };
 
 #endif // CDS_guloso_H
-
