@@ -2,6 +2,7 @@
 #include <chrono>
 #include <vector>
 #include "Gerenciador.h"
+#include "No.h"
 
 /*
 Alunos:
@@ -14,47 +15,8 @@ Repositório: https://github.com/Rogire/t1-dcc059-2025-1
 */
 using namespace std;
 
-
-void testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas)
+void imprimir_valores(std::vector<std::pair<double,std::vector<No*>>>& Valores_media_guloso,std::vector<std::pair<double,std::vector<No*>>>& Valores_media_guloso_rand,std::vector<std::pair<double,std::vector<No*>>>& Valores_reativo, std::vector<float>& alphas)
 {
-    std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso;
-    std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso_rand;
-    std::vector<std::pair<double,std::vector<No*>>> Valores_reativo;
-    
-    //std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso_rand_reat;
-    std::vector<elemento> Valores_media_guloso_rand_reat;
-
-    for(int i{0};i<num_Iter;i++)
-    {
-        CDS_guloso solver;
-        srand(static_cast<unsigned int>(time(NULL)));
-
-        auto ini1 = std::chrono::high_resolution_clock::now();
-        vector<No*> resG = solver.CDS(grafo);
-        auto fim1 = std::chrono::high_resolution_clock::now();
-        double tempo1 = std::chrono::duration<double>(fim1 - ini1).count();
-
-        Valores_media_guloso.push_back(std::make_pair(tempo1, resG));
-
-        for(float v : alphas)
-        {
-            auto ini2 = std::chrono::high_resolution_clock::now();
-            vector<No *> resG_Rnd = solver.CDS_randomizado(grafo, v);
-            auto fim2 = std::chrono::high_resolution_clock::now();
-            double tempo2 = std::chrono::duration<double>(fim2 - ini2).count();
-
-            Valores_media_guloso_rand.push_back(std::make_pair(tempo2, resG_Rnd));
-        }
-
-        auto ini3 = std::chrono::high_resolution_clock::now();
-        auto resg_G_rnd_reat = solver.CDS_randomizado_reativo(grafo,alphas, 300, 30,false);
-        auto fim3 = std::chrono::high_resolution_clock::now();
-        double tempo3 = std::chrono::duration<double>(fim3 - ini3).count();
-
-        Valores_reativo.push_back(std::make_pair(tempo3, resg_G_rnd_reat.solucao));
-        Valores_media_guloso_rand_reat.push_back(resg_G_rnd_reat);
-    }
-
     std::cout<<"Valores media Guloso: \n";
     for(std::pair<double,std::vector<No*>> v : Valores_media_guloso)
     {
@@ -83,21 +45,78 @@ void testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas)
             std::cout<<" "<<n->id;
         std::cout<<"\n";
     }
-
-    std::cout<<"Valores media Internos Guloso Randomizado Reativo: \n";
-
-    for(auto v : Valores_media_guloso_rand_reat)
-    {
-        std::cout<<"Tempo: "<<v.tempo<<" Tamanho: "<<v.solucao.size()<<" Alpha: "<<v.alpha<<"\n";
-
-        for(auto n : v.solucao)
-            std::cout<<" "<<n->id;
-
-        std::cout<<"\n";
-        
-    }
-    
 }
+
+double calcular_tempo(CDS_guloso solver, Grafo* grafo, vector<No*>* resG, char tipo,float alpha=-1,std::vector<float> alphas={})
+{
+    auto ini1 = std::chrono::high_resolution_clock::now();
+    if(tipo == 'a')
+        *resG = solver.CDS(grafo);
+    else if(tipo=='b')
+        *resG = solver.CDS_randomizado(grafo,alpha);
+    else if(tipo=='c')
+        *resG = solver.CDS_randomizado_reativo(grafo,alphas,300,30,false).solucao;
+    auto fim1 = std::chrono::high_resolution_clock::now();
+    
+    return std::chrono::duration<double>(fim1 - ini1).count();
+}
+
+std::pair<double,double> calcular_media(std::vector<std::pair<double,std::vector<No*>>> valores)
+{
+    double media_tempo = 0;
+    double media_tam = 0;
+
+    for(std::pair<double,std::vector<No*>> v : valores)
+    {
+        media_tempo += v.first;
+        media_tam += v.second.size();
+    }
+
+    return {(media_tempo/valores.size()),(media_tam/valores.size())};
+}
+
+void testar_algoritmos(int num_Iter, Grafo* grafo, std::vector<float> alphas, bool printar=false)
+{
+    std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso;
+    std::vector<std::pair<double,std::vector<No*>>> Valores_media_guloso_rand;
+    std::vector<std::pair<double,std::vector<No*>>> Valores_reativo;
+    
+    std::pair<double,double> media_guloso, media_guloso_rand, media_reativo;
+
+    for(int i{0};i<num_Iter;i++)
+    {
+        CDS_guloso solver;
+        srand(static_cast<unsigned int>(time(NULL)));
+
+        vector<No*> resG;
+        double tempo1 = calcular_tempo(solver,grafo,&resG,'a');
+
+        Valores_media_guloso.push_back(std::make_pair(tempo1, resG));
+
+        for(float v : alphas)
+        {
+            vector<No *> resG_Rnd;
+            double tempo2 = calcular_tempo(solver,grafo,&resG_Rnd,'b',v);
+            Valores_media_guloso_rand.push_back(std::make_pair(tempo2, resG_Rnd));
+        }
+
+        vector<No*> resg_G_rnd_reat;
+        double tempo3 = calcular_tempo(solver, grafo, &resg_G_rnd_reat, 'c',-1,alphas);
+        Valores_reativo.push_back(std::make_pair(tempo3, resg_G_rnd_reat));
+    }
+
+    if(printar)
+        imprimir_valores(Valores_media_guloso, Valores_media_guloso_rand, Valores_reativo, alphas);
+
+    media_guloso = calcular_media(Valores_media_guloso);
+    media_guloso_rand = calcular_media(Valores_media_guloso_rand);
+    media_reativo = calcular_media(Valores_reativo);
+
+    std::cout<<"Media Guloso:\nmédia tempo: "<<media_guloso.first<<" média tamanho: "<<media_guloso.second<<"\n";
+    std::cout<<"Media Guloso Randomizado:\nmédia tempo: "<<media_guloso_rand.first<<" média tamanho: "<<media_guloso_rand.second<<"\n";
+    std::cout<<"Media Guloso Randomizado Reativo: \nmédia tempo: "<<media_reativo.first<<" média tamanho: "<<media_reativo.second<<"\n";
+}
+
 int main(int argc, char *argv[])
 {
     Grafo* grafo = new Grafo();
@@ -169,7 +188,6 @@ int main(int argc, char *argv[])
         else {
             testar_algoritmos(30,  grafo,  {0.8, 0.5, 0.2});
         }
-
     }
     return 0;
 }

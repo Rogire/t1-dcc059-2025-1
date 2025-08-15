@@ -145,7 +145,6 @@ std::vector<No*> CDS_guloso::Construtivo_randomizado(Grafo *grafo,float alpha)
 
     int maior_primeiro{INT_MIN}, i_primeiro{};
 
-    //pega o primeiro nó de forma gulosa para otimizar o algoritmo (não é estritamente necessário, mas melhora performance)
     No *maior_ord{};
     for (int j = 0; j < Candidatos.size(); j++)
     {
